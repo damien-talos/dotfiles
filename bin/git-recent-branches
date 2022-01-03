@@ -1,0 +1,76 @@
+#!/bin/bash
+# -------------------------------------------------------- #
+# See all recent branches in order of most recent checkout #
+# -------------------------------------------------------- #
+
+# Get command info
+CMD_PWD=$(pwd)
+CMD="$0"
+CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
+RED='\033[01;31m'
+STRIKETHROUGH='\e[9m'
+RESET='\033[00m'
+
+ansi() { echo -en "\e[${1}m${*:2}\e[0m"; }
+bold() { ansi 1 "$@"; }
+italic() { ansi 3 "$@"; }
+underline() { ansi 4 "$@"; }
+strikethrough() { ansi 9 "$@"; }
+red() { ansi 31 "$@"; }
+
+[ -n "$VERBOSE" ] || VERBOSE=0
+[ -n "$DEBUG" ] || DEBUG=0
+[ -n "$SHOW_ALL" ] || SHOW_ALL=0
+[ -n "$MAX_REFS" ] || MAX_REFS=20
+
+out() { echo -e "$(date +%Y-%m-%dT%H:%M:%SZ): $*"; }
+err() { out "$*" 1>&2; }
+vrb() { [ ! "$VERBOSE" ] && out "$@"; }
+dbg() { [ ! "$DEBUG" ] && err "$@"; }
+die() { err "EXIT: ${RED}$1${RESET}" && [ "$2" ] && [ "$2" -ge 0 ] && exit "$2" || exit 1; }
+
+# Show help function to be used below
+show_help() {
+    awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
+    echo "List git branches by order of most recent checkout"
+    echo "USAGE: $(basename "$CMD") [arguments]"
+    echo "ARGS:"
+    MSG=$(awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -e 's/)/\t/' | awk -F'\t' '/^-/ {printf "  %-6s%-20s%s\n", $1, $2, $3}')
+    # echo -e "$MSG"
+    EMSG=$(eval "echo \"$MSG\"")
+    echo "$EMSG"
+}
+
+POSITIONAL=()
+
+NARGS=-1
+while [ "$#" -ne "$NARGS" ]; do
+    NARGS=$#
+    case $1 in
+    # BEGIN SWITCHES
+    -h | --help) # This help message
+        show_help
+        exit 0
+        ;;
+    -v | --verbose) # Enable verbose messages (DEFAULT: $VERBOSE)
+        VERBOSE=$((VERBOSE + 1)) && shift && echo "#-INFO: VERBOSE=$VERBOSE" ;;
+    -a | --all) # Include duplicates (DEFAULT: $SHOW_ALL)
+        shift && SHOW_ALL=1 && vrb "#-INFO: SHOW_ALL=$SHOW_ALL" ;;
+    -n | --number) # Max number of branches to show (DEFAULT: $MAX_REFS)
+        shift && MAX_REFS=$1 && shift && vrb "#-INFO: MAX_REFS:$MAX_REFS" ;;
+    esac
+done
+
+git reflog |
+    egrep -io "moving from ([^[:space:]]+)" |
+    awk '{ print "@{-"++count"}" "\t" $3}' |
+    if [ "$SHOW_ALL" -eq "0" ]; then awk ' !x[$2]++'; else cat; fi |
+    (while read -r line; do
+        if git rev-parse --verify $(echo $line | awk '{ print $2 }') &>/dev/null; then
+            echo -e "$line"
+        else
+            echo -e "${RED}${STRIKETHROUGH}${line}${RESET}"
+            # eval $(echo $line | awk '{ print "echo -e " $1 "\"\\t\"$(bold $(red $(strikethrough " $2 ")))" }')
+        fi
+    done) |
+    if [ "$MAX_REFS" -eq "0" ]; then cat; else head -n $MAX_REFS; fi

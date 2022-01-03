@@ -1,0 +1,14 @@
+die() {
+    echo -e "${RED}$1${RESET}"
+    exit 1
+}
+
+for d in ~/workspace/talos/Ava-UI/.git/worktrees/*; do
+    if [ ! -f "$(cat $d/gitdir)" ]; then
+        TARGET=$(cat "$d/gitdir")
+        CHECKOUT_DIR=$(dirname "$TARGET")
+        mkdir -p $CHECKOUT_DIR && echo "gitdir: $d" >$TARGET || die "Error setting gitdir for $TARGET"
+        git -C $CHECKOUT_DIR restore . || die "Error restoring worktree for $TARGET"
+        yarn install --cwd $CHECKOUT_DIR || die "Error installing yarn packages for $TARGET"
+    fi
+done

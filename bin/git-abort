@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+repo_path=$(git rev-parse --git-dir)
+
+if [ $? -ne 0 ]; then
+    exit $?
+fi
+
+if [ -d "${repo_path}/rebase-merge" ]; then
+    git rebase --abort
+elif [ -d "${repo_path}/rebase-apply" ]; then
+    git rebase --abort
+elif [ -f "${repo_path}/MERGE_HEAD" ]; then
+    git merge --abort
+elif [ -f "${repo_path}/CHERRY_PICK_HEAD" ]; then
+    git cherry-pick --abort
+elif [ -f "${repo_path}/REVERT_HEAD" ]; then
+    git revert --abort
+else
+    echo "Nothing in progress?"
+fi

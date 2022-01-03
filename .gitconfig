@@ -1,0 +1,80 @@
+[alias]
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+	# branches = branch -v
+	# cleanup = !git branch --merged | grep -v '(^(\\*|\\+))' | xargs --no-run-if-empty git branch -d
+	cleanup-gone = !git branch -a --format='%(refname:short) %(upstream:track)' | grep '\\[gone\\]' | awk '{print $1}'
+	# co = checkout
+	cp = cherry-pick -x
+	# edrc = config -e
+	# g = grep --break --heading --line-number
+	gedrc = config -e --global
+	# heads = branch -vv
+	hist = log --pretty=onelinelog --date=short --graph --color=always
+	# missing = !git fetch -q && git ls-remote --refs | grep --color=always unsynced
+	newbranch = "!f() { git sync; git switch --no-track -c damien/$@ origin/HEAD; }; f"
+	# pick = cherry-pick -x --edit
+	pushf = push --force-with-lease
+	pushup = -c push.default=current push -u
+	# recent-branches = for-each-ref --sort=-committerdate --count=10 --format='%(HEAD) %(refname:short)' refs/heads/
+	reup = !git sync && git rebase origin/HEAD
+	# rev = notes show
+	# rev2sha = !git log --pretty=onelinelog --date=short --all --color=always | grep --color=always
+	st = status
+	stash = stash -u
+	stashgrep = "!f() { for i in `git stash list --format=\"%gd\"` ; do git stash show -p $i | grep --color=always -C 4 -H --label=\"$i\" \"$@\"; done ; }; f"
+	stashk = "!f() { git stash \"$@\" && git stash apply; }; f"
+	# stat = show --stat
+	sync = fetch -p -P --all --tags
+	fix = commit --amend --no-edit
+	up = pull
+[blame]
+	# ignoreRevsFile = .git-blame-ignore-revs
+	markUnblamableLines = true
+	markUnblamables = true
+[branch]
+	autosetuprebase = always
+[core]
+	editor = code -w
+[credential]
+	helper = store
+[diff]
+	algorithm = histogram
+	colorMoved = zebra
+	# tool = TortoiseGitMerge
+	wsErrorHighlight = all
+[difftool]
+	# prompt = false
+[fetch]
+	prune = true
+[grep]
+	extendRegexp = true
+	lineNumber = true
+[log]
+	follow = true
+[merge]
+	conflictstyle = diff3
+	renames = true
+	renormalize = true
+	# tool = TortoiseGitMerge
+# [mergetool "TortoiseGitMerge"]
+# 	cmd = \"C:\\Program Files\\TortoiseGit\\bin\\TortoiseGitMerge.exe\" -base:\"$BASE\" -mine:\"$LOCAL\" -theirs:\"$REMOTE\" -merged:\"$MERGED\"
+[mergetool]
+	keepBackup = false
+[pretty]
+	branchcompare=- [ ] %C(bold cyan)%h -- %C(bold green)@%an -- %C(bold red)%ad %Creset(%C(bold yellow)%N%-%Creset)%n      %s%-
+	onelinelog=%C(bold yellow)%N%- %Creset%ad%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
+[pull]
+	rebase = true
+[push]
+	default = simple
+[rebase]
+	autoStash = true
+	missingCommitsCheck = error
+[rerere]
+	autoUpdate = true
+	enabled = true
+[user]
+	name = Damien Schoof
+	email = damien.schoof@talostrading.com
+[init]
+	defaultBranch = main

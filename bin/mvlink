@@ -1,0 +1,25 @@
+#!/bin/bash
+set -exo pipefail
+
+while [ $# -gt 1 ]; do
+    eval "target=\${$#}"
+    original="$1"
+    if [ -d "$target" ]; then
+        target="$target/${original##*/}"
+    fi
+    mkdir -p -- "$(dirname -- "$target")"
+    case "$original" in
+    */*)
+        case "$target" in
+        /*) : ;;
+        *)
+            target=$(realpath ${target%*/})
+            original=$(realpath "${original%*/}")
+            ;;
+        esac
+        ;;
+    esac
+    mv -- "$original" "$target"
+    ln -s -- "$target" "$original"
+    shift
+done
