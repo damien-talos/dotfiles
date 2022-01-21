@@ -74,8 +74,8 @@
 [rebase]
 	autoStash = true
 	missingCommitsCheck = error
-[remote "origin"]
-	push = ^refs/heads/dura/*
+# [remote "origin"]
+# 	push = ^refs/heads/dura/*
 [rerere]
 	autoUpdate = true
 	enabled = true
