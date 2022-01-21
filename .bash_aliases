@@ -23,4 +23,6 @@ alias current-paths='echo $PATH | awk -F : '"'"'BEGIN {OFS="\n"}; {$1=$1; print 
 
 alias dirs='dirs -v'
 
+alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
+
 . ~/.talos_aliases

@@ -17,7 +17,7 @@ RESET='\e[00m'
 [ -n "$PULL_REQUEST_ID" ] || PULL_REQUEST_ID=
 [ -n "$BRANCH_NAME" ] || BRANCH_NAME=""
 [ -n "$CHECKOUT_PATH" ] || CHECKOUT_PATH=""
-[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="~/workspace/talos/Ava-UI"
+[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="${HOME}/workspace/talos/Ava-UI"
 [ -n "$ECHO_CURRENT_DIR" ] || ECHO_CURRENT_DIR=0
 # END SCRIPT VARIABLES
 
@@ -71,9 +71,9 @@ while [ "$#" -ne "$NARGS" ]; do
         shift && PULL_REQUEST_ID="$1" && shift && vrb "#-INFO: PULL_REQUEST_ID=$PULL_REQUEST_ID" ;;
     -br | --branch) # Name of branch to checkout (if not specified, will be the branch for the specified pull request) (DEFAULT: $BRANCH_NAME)
         shift && BRANCH_NAME="$1" && shift && vrb "#-INFO: BRANCH_NAME=$BRANCH_NAME" ;;
-    -path | --checkout-path) # Path to checkout into (DEFAULT: ${CHECKOUT_PATH:-/tmp/ramdisk/pr\$PULL_REQUEST_ID})
+    -path | --checkout-path) # Path to checkout into (DEFAULT: ${CHECKOUT_PATH:-/tmp/ramdisk/pr\$\{PULL_REQUEST_ID\}})
         shift && CHECKOUT_PATH="$1" && shift && vrb "#-INFO: CHECKOUT_PATH=$CHECKOUT_PATH" ;;
-    -root | --git-worktree-root) # Main git path (DEFAULT: ${GIT_WORKTREE_ROOT:-~/workspace/talos/Ava-UI})
+    -root | --git-worktree-root) # Main git path (DEFAULT: ${GIT_WORKTREE_ROOT:-${HOME}/workspace/talos/Ava-UI})
         shift && GIT_WORKTREE_ROOT="$1" && shift && vrb "#-INFO: GIT_WORKTREE_ROOT=$GIT_WORKTREE_ROOT" ;;
     -ecd | --echo-cd) # Echo the CWD before exit (to allow calling function to cd / source) (DEFAULT: $ECHO_CURRENT_DIR)
         shift && ECHO_CURRENT_DIR=1 && vrb "#-INFO: ECHO_CURRENT_DIR=$ECHO_CURRENT_DIR" ;;
@@ -115,11 +115,14 @@ if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
 fi
 
 if [ -d "${CHECKOUT_PATH}" ]; then
+    dbg "${CHECKOUT_PATH} exists"
     cd "${CHECKOUT_PATH}"
 
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD) || die "Error getting current branch name in ${CHECKOUT_PATH}" $?
+    dbg "Current branch = ${CURRENT_BRANCH}"
 
     if [ "$CURRENT_BRANCH" != "$BRANCH_NAME" ]; then
+        git -C "${GIT_WORKTREE_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
         git switch $BRANCH_NAME || die "Error switching from $CURRENT_BRANCH to $BRANCH_NAME" $?
     fi
     git pull --ff-only || die "Error pulling latest changes for $BRANCH_NAME" $?

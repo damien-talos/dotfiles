@@ -7,11 +7,11 @@
 
 shopt -s extglob
 
-export PATH=~/bin:~/.local/share/flatpak/exports/bin:$PATH
+export PATH=~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
 export EDITOR=code
 export FZF_DEFAULT_COMMAND='fd'
 export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."
-export GITHUB_TOKEN=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
+export GITHUB_TOKEN=$(cat ~/.github_token)
 
 # Escape code definitions
 BLUE='\e[01;34m'
