@@ -98,7 +98,7 @@ ASUS_24=$(get_port 00ffffffffffff0006b3c12401010101)
 
 if [ -n "${ASUS_24}" ]; then
     vrb "ASUS 24: ${ASUS_24}"
-    xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal
+    xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x0 --rotate normal
 else
     err "${RED}Could not find monitor ASUS_24${RESET}"
 fi
