@@ -7,7 +7,7 @@
 
 shopt -s extglob
 
-export PATH=~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
+export PATH=$(yarn global bin):~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
 export EDITOR=code
 export FZF_DEFAULT_COMMAND='fd'
 export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."

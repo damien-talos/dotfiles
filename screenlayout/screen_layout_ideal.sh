@@ -92,10 +92,17 @@ get_port() {
 
 }
 
+BUILT_IN=$(get_port 00ffffffffffff0006af3d5700000000)
 LENOVO_27=$(get_port 00ffffffffffff0030aeaf6147424b32)
 LENOVO_32=$(get_port 00ffffffffffff0030aef26100000000)
 ASUS_24=$(get_port 00ffffffffffff0006b3c12401010101)
 
+if [ -n "${BUILT_IN}" ]; then
+    vrb "BUILT IN: ${BUILT_IN}"
+    xrandr --output $BUILT_IN --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal
+else
+    err "${RED}Could not find monitor BUILT_IN${RESET}"
+fi
 if [ -n "${ASUS_24}" ]; then
     vrb "ASUS 24: ${ASUS_24}"
     xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x0 --rotate normal
