@@ -1,4 +1,3 @@
-
 ####################
 ### PROMPT SETUP ###
 ####################
@@ -32,17 +31,24 @@ function timer_stop {
     declare delta_us=$((($(timer_now) - $timer_start) / 1000))
     declare us=$((delta_us % 1000))
     declare ms=$(((delta_us / 1000) % 1000))
-    declare s=$(((delta_us / (1000*1000)) % 60))
-    declare m=$(((delta_us / (60*1000*1000)) % 60))
-    declare h=$((delta_us / (60*60*1000*1000)))
+    declare s=$(((delta_us / (1000 * 1000)) % 60))
+    declare m=$(((delta_us / (60 * 1000 * 1000)) % 60))
+    declare h=$((delta_us / (60 * 60 * 1000 * 1000)))
     # Goal: always show around 3 digits of accuracy
-    if ((h > 0)); then timer_show=${h}h${m}m
-    elif ((m > 0)); then timer_show=${m}m${s}s
-    elif ((s >= 10)); then timer_show=${s}.$((ms / 100))s
-    elif ((s > 0)); then timer_show=${s}.$(printf %03d $ms)s
-    elif ((ms >= 100)); then timer_show=${ms}ms
-    elif ((ms > 0)); then timer_show=${ms}.$((us / 100))ms
-    else timer_show=${us}us
+    if ((h > 0)); then
+        timer_show=${h}h${m}m
+    elif ((m > 0)); then
+        timer_show=${m}m${s}s
+    elif ((s >= 10)); then
+        timer_show=${s}.$((ms / 100))s
+    elif ((s > 0)); then
+        timer_show=${s}.$(printf %03d $ms)s
+    elif ((ms >= 100)); then
+        timer_show=${ms}ms
+    elif ((ms > 0)); then
+        timer_show=${ms}.$((us / 100))ms
+    else
+        timer_show=${us}us
     fi
     echo "$timer_show"
 }
@@ -61,10 +67,10 @@ set_git_prompt() {
     # COMPLETION_PATH="$COMPLETION_PATH/share/git/completion"
     COMPLETION_PATH="$HOME"
 
-    unset GIT_PS1_SHOWDIRTYSTATE        # don't enable, too slow
-    unset GIT_PS1_SHOWUNTRACKEDFILES    # don't enable, too slow
-    unset GIT_PS1_SHOWUPSTREAM          # don't enable, too slow
-    GIT_PS1_OMITSPARSESTATE=1           # disables another check
+    unset GIT_PS1_SHOWDIRTYSTATE     # don't enable, too slow
+    unset GIT_PS1_SHOWUNTRACKEDFILES # don't enable, too slow
+    unset GIT_PS1_SHOWUPSTREAM       # don't enable, too slow
+    export GIT_PS1_OMITSPARSESTATE=1 # disables another check
 
     test -f "$COMPLETION_PATH/git-completion.bash" && . "$COMPLETION_PATH/git-completion.bash" || echo "Warning: couldn't find git-completion.bash"
     test -f "$COMPLETION_PATH/git-prompt.sh" && . "$COMPLETION_PATH/git-prompt.sh" || echo "Warning: couldn't find git-prompt.sh"
@@ -76,11 +82,13 @@ set_git_prompt() {
 # From https://stackoverflow.com/a/52944692
 ###
 __get_terminal_column() {
-  local pos
+    stty echo # ensure that input is being echoed on screen
 
-  IFS='[;' read -p $'\e[6n' -d R -a pos -rs || echo "${FUNCNAME[0]} failed with error: $? ; ${pos[*]}"
-  #echo "$((${pos[1]} - 1))" # row
-  echo "$((${pos[2]} - 1))" # column
+    local pos
+
+    IFS='[;' read -p $'\e[6n' -d R -a pos -rs || echo "${FUNCNAME[0]} failed with error: $? ; ${pos[*]}"
+    #echo "$((${pos[1]} - 1))" # row
+    echo "$((${pos[2]} - 1))" # column
 }
 
 set_prompt() {
@@ -104,10 +112,10 @@ set_prompt() {
     fi
 
     PS1+='\[\033]0;${PWD//[^[:ascii:]]/?}\007\]' # set window title
-    
+
     # Results of the last command run (exit code + run time)
     if [[ $FIRST_PROMPT -ne 1 ]]; then
-        PS1+="$PromptWhite$Last_Command "           # Add a bright white exit status for the last command
+        PS1+="$PromptWhite$Last_Command " # Add a bright white exit status for the last command
         # If it was successful, print a green check mark. Otherwise, print
         # a red X.
         if [[ $Last_Command == 0 ]]; then
@@ -115,41 +123,41 @@ set_prompt() {
         else
             PS1+="$PromptRed$PromptFancyX"
         fi
-        PS1+=" ($last_command_run_time) "      # Time to execute last command
+        PS1+=" ($last_command_run_time) " # Time to execute last command
     fi
 
-    PS1+="$PromptRed\t$PromptReset @ "      # current time (HH:MM:SS) when this prompt was shown
-    PS1+="$PromptBrownYellow\w"       # current working directory
-    
-    PS1+="$PromptCyan"  # change color to cyan
-    GIT_PS1=`__git_ps1`   # bash function
-    PS1="$PS1$GIT_PS1"   
-    
-    PS1="$PS1"'\[\033[0m\]'        # change color
-    PS1="$PS1"'\n'                 # new line
-    PS1="$PS1"'λ '                 # prompt: always λ 
+    PS1+="$PromptRed\t$PromptReset @ " # current time (HH:MM:SS) when this prompt was shown
+    PS1+="$PromptBrownYellow\w"        # current working directory
+
+    PS1+="$PromptCyan"   # change color to cyan
+    GIT_PS1=$(__git_ps1) # bash function
+    PS1="$PS1$GIT_PS1"
+
+    PS1="$PS1"'\[\033[0m\]' # change color
+    PS1="$PS1"'\n'          # new line
+    PS1="$PS1"'λ '          # prompt: always λ
 }
-prompt_command () {
+prompt_command() {
     Last_Command=$? # Must come first! - stores the exit code of the last command ran
-    
+
     # To distinguish between chained commands (e.g. echo 1; echo 2; echo 3)
     # and being called to display the actual prompt - we don't want to reset
     # $timer_start for each command in the chain, even the the DEBUG trap gets
-    # called for each of those commands, so `pre_command` checks this variable 
+    # called for each of those commands, so `pre_command` checks this variable
     # to see if we are at a prompt or not
     AT_PROMPT=1
 
     if [[ $FIRST_PROMPT -ne 1 ]]; then
-        last_command_run_time=$(timer_stop $last_command_start)  # stop the timer for the last command we ran
+        last_command_run_time=$(timer_stop $last_command_start) # stop the timer for the last command we ran
         unset last_command_start
     else
-        set_git_prompt  # Initial setup for git prompt, sources the git prompt file and completion scripts one time at startup
+        set_git_prompt # Initial setup for git prompt, sources the git prompt file and completion scripts one time at startup
     fi
 
-    set_prompt              # set the actual prompt displayed
+    set_prompt                      # set the actual prompt displayed
     export date=$(date +"%Y-%m-%d") # Set the current date as a variable
 
-    save_history            # Save the history so it is shared across sessions
+    save_history # Save the history so it is shared across sessions
 
     # Clear the variable that prevents checking previous command result and timing
     # for the very first command
@@ -157,11 +165,11 @@ prompt_command () {
 }
 
 # Show the time taken to execute various parts of the prompt_command
-show_prompt_timings () {
-    declare -n timings; # variable reference by name - set to the name of the variable that we want to display
+show_prompt_timings() {
+    declare -n timings # variable reference by name - set to the name of the variable that we want to display
     [[ $# -gt 0 ]] && { timings="$1"; } || { timings='prompt_timings'; }
     for t in "${!timings[@]}"; do
         printf "%-32s %s\n" "$t" "${timings[$t]}"
     done | sort -n
 }
-PROMPT_COMMAND=prompt_command     # Execute prompt_command() every time we show a prompt
+PROMPT_COMMAND=prompt_command # Execute prompt_command() every time we show a prompt

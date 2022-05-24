@@ -1,3 +1,4 @@
+#!/bin/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -5,9 +6,10 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-shopt -s extglob
+shopt -s extglob globstar
 
-export PATH=$(yarn global bin):~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
+PATH=$(yarn global bin):~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
+export PATH
 export EDITOR=code
 export FZF_DEFAULT_COMMAND='fd'
 export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."
@@ -44,13 +46,26 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+  . /etc/bash_completion
+fi
+
+source_or_err() {
+  if [ -f "$1" ]; then
+    . "$1"
+  else
+    echo -e "${RED}Unable to find and source $1${RESET}"
+  fi
+}
+
 # Load my fancy prompt
-. ~/.bash-prompt.sh
+source_or_err "${HOME}/.bash-prompt.sh"
 
 # Alias definitions.
-if [ -f ~/.bash_aliases ]; then
-  . ~/.bash_aliases
-fi
+source_or_err "${HOME}/.bash_aliases"
 
 # Functions are split to individual script files for readability
 if [ -d ~/.config/bash/functions.d ]; then
@@ -65,22 +80,19 @@ fi
 # source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
 # bind -x '"\t": fzf_bash_completion'
 
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-#if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-#    . /etc/bash_completion
-#fi
-. "$HOME/.cargo/env"
+# shellcheck source=/dev/null
+source_or_err "$HOME/.cargo/env"
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+# shellcheck source=/dev/null
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+# shellcheck source=/dev/null
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 ### LOAD AVA ENVIRONMENT VARS
-if [ -f /home/damien/workspace/talos/env/ava-vars.sh ]; then
-  source /home/damien/workspace/talos/env/ava-vars.sh
-fi
+source_or_err "/home/damien/workspace/talos/env/ava-vars.sh"
 ### END LOAD AVA ENVIRONMENT VARS
+
+# [ -f /home/damien/workspace/shellcheck-repl/shellcheck-repl.bash ] && source "/home/damien/workspace/shellcheck-repl/shellcheck-repl.bash"
 
 # for d in ~/workspace/talos/Ava-UI/.git/worktrees/*; do if [ ! -f "$(cat $d/gitdir)" ]; then TARGET=$(cat "$d/gitdir"); mkdir -p $(dirname "$TARGET") && echo "gitdir: $d" > $TARGET; fi; done

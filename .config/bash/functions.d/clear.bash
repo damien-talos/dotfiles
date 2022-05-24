@@ -11,7 +11,7 @@ RED='\e[01;31m'
 RESET='\e[00m'
 
 # Show help function to be used below
-show_help() {
+clear_show_help() {
     awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
     echo "$CMD clears the screen or a given file(s)"
     echo "USAGE: $(basename "$CMD") [arguments]"
@@ -39,7 +39,7 @@ clear() {
         # END_KNOWN_ALIASES
         *)
             echo "Unknown clear target $1 does not exist"
-            show_help
+            clear_show_help
             ;;
         esac
     else

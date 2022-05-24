@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
+set -exo pipefail
 
-repo_path=$(git rev-parse --git-dir)
-
-if [ $? -ne 0 ]; then
+if ! repo_path=$(git rev-parse --git-dir); then
     exit $?
 fi
 

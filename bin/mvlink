@@ -1,7 +1,83 @@
 #!/bin/bash
+# --------------------------------------------- #
+# SCRIPT DESCRIPTION GOES HERE #
+# --------------------------------------------- #
 set -exo pipefail
 
+# Get command info
+CMD_PWD=$(pwd)
+CMD="$0"
+CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
+RED='\e[01;31m'
+RESET='\e[00m'
+
+# BEGIN SCRIPT VARIABLES
+[ -n "$VERBOSE" ] || VERBOSE=0
+[ -n "$OPEN_EDITOR" ] || OPEN_EDITOR=1
+[ -n "$YARN_INSTALL" ] || YARN_INSTALL=1
+[ -n "$PULL_REQUEST_ID" ] || PULL_REQUEST_ID=
+[ -n "$BRANCH_NAME" ] || BRANCH_NAME=""
+[ -n "$CHECKOUT_PATH" ] || CHECKOUT_PATH=""
+[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="~/workspace/talos/Ava-UI"
+[ -n "$ECHO_CURRENT_DIR" ] || ECHO_CURRENT_DIR=0
+# END SCRIPT VARIABLES
+
+out() { echo -e "$(date +%Y-%m-%dT%H:%M:%SZ): $*"; }
+err() { out "$*" 1>&2; }
+vrb() { if [ $VERBOSE -gt 1 ]; then out "$@"; fi; }
+dbg() { if [ $VERBOSE -gt 0 ]; then err "$@"; fi; }
+die() { err "EXIT: ${RED}$1${RESET}" && [ "$2" ] && [ "$2" -ge 0 ] && exit "$2" || exit 1; }
+
+# Show help function to be used below
+show_help() {
+    awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
+    echo "$CMD moves a file / directory to a new location, then creates a symlink in the original location"
+    echo "USAGE: $(basename "$CMD") from [from ...] to"
+    echo "ARGS:"
+    MSG=$(awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -e 's/)/\t/' | awk -F'\t' '/^-/ {printf "  %-6s%-20s%s\n", $1, $2, $3}')
+    # echo -e "$MSG"
+    EMSG=$(eval "echo \"$MSG\"")
+    echo "$EMSG"
+    echo ""
+    echo "EXAMPLE:"
+    echo "    $CMD ~/bin/*.sh ~/workspace/dotfiles/bin"
+}
+
+show_variables() {
+    MSG=$(awk '/# BEGIN SCRIPT VARIABLES/,/# END SCRIPT VARIABLES/{if (match($0,/# END SCRIPT VARIABLES/)) exit; print;}' "$CMD" |
+        sed -e '/^#/d' -e 's/^\[ -n "\$//' -e 's/".*//' |
+        sed -Ee 's/(.+)/dbg "\1=\${\1}"/')
+    eval "$MSG"
+}
+
+POSITIONAL=()
+
+NARGS=-1
+while [ "$#" -ne "$NARGS" ]; do
+    NARGS=$#
+    case $1 in
+    # BEGIN SWITCHES
+    -h | --help) # This help message
+        show_help
+        exit 0
+        ;;
+    -v | --verbose) # Enable verbose messages (DEFAULT: $VERBOSE)
+        VERBOSE=$((VERBOSE + 1)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
+    *) # unknown option, save it in an array for later
+        # if [ "${1:0:1}" = "-" ]; then
+        #     new_args=$(echo "$1" | grep -o '[[:alnum:]]' | sed -E -e 's/^/-/')
+        #     echo "${new_args}"
+        # fi
+        POSITIONAL+=("$1") && shift
+        ;;
+        # END SWITCHES
+    esac
+done
+
+set -- "${POSITIONAL[@]}"
+
 while [ $# -gt 1 ]; do
+    # target === last argument passed on the command line
     eval "target=\${$#}"
     original="$1"
     if [ -d "$target" ]; then

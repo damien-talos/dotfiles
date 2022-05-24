@@ -26,3 +26,5 @@ alias dirs='dirs -v'
 alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
 
 . ~/.talos_aliases
+
+alias lspath="which \$(compgen -A function -abck) | sort -u"

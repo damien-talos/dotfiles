@@ -1,3 +1,10 @@
 #!/usr/bin/env bash
+set -exo pipefail
+
+# Ubuntu has some git-sync command already on disk,
+# but it doesn't do what I want.  Aliases are lower
+# priority than commands, so the only way to override
+# that command is by creating a custom command that
+# comes before it in `$PATH`
 
 git fetch -p -P --all --tags

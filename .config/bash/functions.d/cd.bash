@@ -1,3 +1,46 @@
+# copied from bash_completion _cd function
+function _cd_complete {
+    local cur prev words cword
+    _init_completion || return
+
+    local IFS=$'\n' i j k
+
+    compopt -o filenames
+
+    # Use standard dir completion if no CDPATH or parameter starts with /,
+    # ./ or ../
+    if [[ ! ${CDPATH:-} || $cur == ?(.)?(.)/* ]]; then
+        _filedir -d
+        return
+    fi
+
+    local -r mark_dirs=$(_rl_enabled mark-directories && echo y)
+    local -r mark_symdirs=$(_rl_enabled mark-symlinked-directories && echo y)
+
+    # we have a CDPATH, so loop on its contents
+    for i in ${CDPATH//:/$'\n'}; do
+        # create an array of matched subdirs
+        k=${#COMPREPLY[@]}
+        for j in $(compgen -d -- $i/$cur); do
+            if [[ ($mark_symdirs && -L $j || $mark_dirs && ! -L $j) && ! -d ${j#"$i/"} ]]; then
+                j+="/"
+            fi
+            COMPREPLY[k++]=${j#"$i/"}
+        done
+    done
+
+    _filedir -d
+
+    if ((${#COMPREPLY[@]} == 1)); then
+        i=${COMPREPLY[0]}
+        if [[ $i == "$cur" && $i != "*/" ]]; then
+            COMPREPLY[0]="${i}/"
+        fi
+    fi
+
+    return
+}
+
 # Replace builtin `cd` command with a custom one that uses `pushd` instead
 function _cd {
     # typing just `_cd` will take you home ;)
@@ -31,4 +74,4 @@ function _cd {
     fi
 }
 alias cd=_cd
-complete -d cd
+complete -F _cd_complete -o nospace cd

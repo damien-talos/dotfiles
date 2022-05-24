@@ -113,5 +113,5 @@ alias alpha='gcloud compute ssh --zone us-east4-a --project talos-ava-uat alpha-
 # Other Utility Machines
 alias monitor='gcloud compute ssh --zone us-east1-b --project talos-ava-prod ws-monitor --tunnel-through-iap'
 
-alias startStaging='BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:staging --verbose --progress | cat'
-alias startUat='BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:uat --verbose --progress | cat'
+alias startStaging='([ -d apps/ava ] && cd apps/ava; BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:staging --verbose --progress | cat)'
+alias startUat='([ -d apps/ava ] && cd apps/ava; BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:uat --verbose --progress | cat)'
