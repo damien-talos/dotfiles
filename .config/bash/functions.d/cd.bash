@@ -1,6 +1,6 @@
 # copied from bash_completion _cd function
 function _cd_complete {
-    local cur prev words cword
+    local cur
     _init_completion || return
 
     local IFS=$'\n' i j k
@@ -45,32 +45,32 @@ function _cd_complete {
 function _cd {
     # typing just `_cd` will take you home ;)
     if [ "$1" == "" ]; then
-        pushd ~ >/dev/null
+        pushd ~ >/dev/null || return
 
     # use `_cd -` to visit previous directory
     elif [ "$1" == "-" ]; then
-        popd >/dev/null
+        popd >/dev/null || return
 
     # use `_cd -n` to go n directories back in history
     elif [[ "$1" =~ ^-[0-9]+$ ]]; then
-        for i in $(seq 1 ${1/-/}); do
-            popd >/dev/null
+        for i in $(seq 1 $((${1/-/} - 1))); do
+            popd -n >/dev/null
         done
-
+        popd >/dev/null || return
     # use `_cd -- <path>` if your path begins with a dash
     elif [ "$1" == "--" ]; then
         shift
-        pushd -- "$@" >/dev/null
+        pushd -- "$@" >/dev/null || return
 
     # basic case: move to a dir and add it to history
     else
-        pushd "$@" >/dev/null
+        pushd "$@" >/dev/null || return
     fi
     if [[ $PWD/ = ~/.links/* ]]; then
         # We are in a shortcut link; replace with the actual path
         REALPATH=$(realpath $PWD)
-        popd >/dev/null
-        pushd -- "$REALPATH" >/dev/null
+        popd >/dev/null || return
+        pushd -- "$REALPATH" >/dev/null || return
     fi
 }
 alias cd=_cd
