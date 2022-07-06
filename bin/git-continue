@@ -11,9 +11,9 @@ elif [ -d "${repo_path}/rebase-apply" ]; then
     GIT_EDITOR=true git rebase --continue "$@"
 elif [ -f "${repo_path}/MERGE_HEAD" ]; then
     GIT_EDITOR=true git merge --continue "$@"
-elif [ -f "${repo_path}/CHERRY_PICK_HEAD" ] || [ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^pick' "${repo_path}/sequencer/todo"; then
+elif [ -f "${repo_path}/CHERRY_PICK_HEAD" ] || ([ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^pick' "${repo_path}/sequencer/todo"); then
     GIT_EDITOR=true git cherry-pick --continue "$@"
-elif [ -f "${repo_path}/REVERT_HEAD" ] || [ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^revert' "${repo_path}/sequencer/todo"; then
+elif [ -f "${repo_path}/REVERT_HEAD" ] || ([ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^revert' "${repo_path}/sequencer/todo"); then
     GIT_EDITOR=true git revert --continue "$@"
 elif [ -f "${repo_path}/ORIG_HEAD" ]; then
     git commit -c ORIG_HEAD "$@"

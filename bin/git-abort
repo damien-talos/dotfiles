@@ -11,11 +11,10 @@ elif [ -d "${repo_path}/rebase-apply" ]; then
     git rebase --abort
 elif [ -f "${repo_path}/MERGE_HEAD" ]; then
     git merge --abort
-elif [ -f "${repo_path}/CHERRY_PICK_HEAD" ] || [ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^pick' "${repo_path}/sequencer/todo"; then
+elif [ -f "${repo_path}/CHERRY_PICK_HEAD" ] || ([ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^pick' "${repo_path}/sequencer/todo"); then
     git cherry-pick --abort
-elif [ -f "${repo_path}/REVERT_HEAD" ] || [ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^revert' "${repo_path}/sequencer/todo"; then
+elif [ -f "${repo_path}/REVERT_HEAD" ] || ([ -f "${repo_path}/sequencer/todo" ] && grep -q -e '^revert' "${repo_path}/sequencer/todo"); then
     git revert --abort
-
 else
     echo "Nothing in progress?"
 fi
