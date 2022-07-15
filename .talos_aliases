@@ -27,6 +27,10 @@ function regen_instances() {
 
 #Creates aliases for connecting to the instances
 function regen_aliases() {
+    local red=$"printf %b '\033]11;#440000\a'"
+    # local orange="printf %b '\e]11;#cc7000\\a\\'"
+    # local green="printf %b '\e]11;#155600\\a\\'"
+    local back=$"printf %b '\033]11;#333333\a'"
 
     regen_instances
 
@@ -34,12 +38,12 @@ function regen_aliases() {
     echo "#!/bin/bash" >"${BIN_DIR}/prod-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/prod-aliases.sh"
 
-    cat "${BIN_DIR}/prod-instances.tsv" | awk '{printf "alias %s=\"printf %%b '"'"'\e]11;#440000\a'"'"' && gcloud beta compute ssh --zone %s --project talos-ava-prod %s --tunnel-through-iap; printf %%b '"'"'\e]111;\a'"'"'\"\n", $1, $2, $1 }' >>"${BIN_DIR}/prod-aliases.sh"
+    cat "${BIN_DIR}/prod-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/prod-aliases.sh"
 
     echo "Regenerating uat aliases to "${BIN_DIR}/uat-aliases.sh
     echo "#!/bin/bash" >"${BIN_DIR}/uat-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/uat-aliases.sh"
-    cat "${BIN_DIR}/uat-instances.tsv" | awk '{printf "alias %s=\"printf %%b '"'"'\e]11;#155600\a'"'"' && gcloud beta compute ssh --zone %s --project talos-ava-uat %s --tunnel-through-iap; printf %%b '"'"'\e]111;\a'"'"'\"\n", $1, $2, $1 }' >>"${BIN_DIR}/uat-aliases.sh"
+    cat "${BIN_DIR}/uat-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/uat-aliases.sh"
 
     source "${BIN_DIR}/prod-aliases.sh"
     source "${BIN_DIR}/uat-aliases.sh"
@@ -293,6 +297,22 @@ function gateway_ids() {
     local env="${1:-prod}"
     yq e '.Gateways.* | { path| .[-1]: .MarketID}' config/gateways/$env.yml
 }
+
+function _pg_tunnel_complete {
+    COMPREPLY=()
+    case $COMP_CWORD in
+    1)
+        local uat_instances=$(awk '{ print $1 };' "${BIN_DIR}/uat-instances.tsv")
+        local prod_instances=$(awk '{ print $1 };' "${BIN_DIR}/prod-instances.tsv")
+        COMPREPLY=($(compgen -W "${uat_instances} ${prod_instances}" -- "${COMP_WORDS[$COMP_CWORD]}"))
+        ;;
+    *)
+        COMPREPLY=($(compgen -f -- "${COMP_WORDS[$COMP_CWORD]}"))
+        ;;
+
+    esac
+}
+complete -F _pg_tunnel_complete pg_tunnel gcp_exec cust_fix_tunnel local_tunnel project_for_instance zone_for_instance pull_from_gcp push_to_gcp
 
 source "${BIN_DIR}/prod-aliases.sh"
 source "${BIN_DIR}/uat-aliases.sh"
