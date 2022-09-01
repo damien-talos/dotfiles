@@ -87,9 +87,17 @@ get_port() {
     #     - Print the pattern space (p;)
     xrandr --prop |
         sed -En \
-            -e '/DisplayPort-[[:digit:]]+/{s/(DisplayPort-[[:digit:]]+).*/\1/;h};' \
+            -e '/\bconnected\b/{s/^([^ ]+).*/\1/;h};' \
             -e "/[[:blank:]]*EDID:[[:blank:]]*/{n;/${1}/{g;p;};}"
 
+}
+
+get_lid_state() {
+    dbus-send --system --print-reply=literal \
+        --dest=org.freedesktop.login1 /org/freedesktop/login1 \
+        org.freedesktop.DBus.Properties.Get \
+        string:org.freedesktop.login1.Manager string:LidClosed |
+        awk 'NR==1{print $3=="true"?"closed":"open"}'
 }
 
 BUILT_IN=$(get_port 00ffffffffffff0006af3d5700000000)
@@ -99,24 +107,37 @@ ASUS_24=$(get_port 00ffffffffffff0006b3c12401010101)
 
 if [ -n "${BUILT_IN}" ]; then
     vrb "BUILT IN: ${BUILT_IN}"
-    xrandr --output $BUILT_IN --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal
+    LID_CLOSED=$(get_lid_state)
+    case "${LID_CLOSED}" in
+    open)
+        vrb "xrandr --output $BUILT_IN --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal"
+        xrandr --output $BUILT_IN --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal
+        ;;
+    *)
+        vrb "xrandr --output $BUILT_IN --off"
+        xrandr --output $BUILT_IN --off
+        ;;
+    esac
 else
     err "${RED}Could not find monitor BUILT_IN${RESET}"
 fi
 if [ -n "${ASUS_24}" ]; then
     vrb "ASUS 24: ${ASUS_24}"
+    vrb "xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x0 --rotate normal"
     xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x0 --rotate normal
 else
     err "${RED}Could not find monitor ASUS_24${RESET}"
 fi
 if [ -n "${LENOVO_27}" ]; then
     vrb "LENOVO 27: ${LENOVO_27}"
+    vrb "xrandr --output $LENOVO_27 --mode 2560x1440 --refresh 60.00 --pos 0x720 --rotate normal"
     xrandr --output $LENOVO_27 --mode 2560x1440 --refresh 60.00 --pos 0x720 --rotate normal
 else
     err "${RED}Could not find monitor LENOVO_27${RESET}"
 fi
 if [ -n "${LENOVO_32}" ]; then
     vrb "LENOVO 32: ${LENOVO_32}"
+    vrb "xrandr --output $LENOVO_32 --primary --mode 3840x2160 --refresh 60.00 --pos 2560x0 --rotate normal"
     xrandr --output $LENOVO_32 --primary --mode 3840x2160 --refresh 60.00 --pos 2560x0 --rotate normal
 else
     err "${RED}Could not find monitor LENOVO_32${RESET}"
