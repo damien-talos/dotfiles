@@ -8,7 +8,7 @@
 
 shopt -s extglob globstar
 
-PATH=$(yarn global bin):~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
+PATH=~/.yarn/bin:~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
 export PATH
 export EDITOR=code
 export FZF_DEFAULT_COMMAND='fd'
@@ -82,6 +82,7 @@ fi
 
 # shellcheck source=/dev/null
 source_or_err "$HOME/.cargo/env"
+source_or_err "/etc/profile.d/rvm.sh" # This loads rvm
 
 export NVM_DIR="$HOME/.nvm"
 # shellcheck source=/dev/null
