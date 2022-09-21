@@ -80,6 +80,7 @@ set_git_prompt() {
 # Get the current terminal column value.
 #
 # From https://stackoverflow.com/a/52944692
+# From https://stackoverflow.com/questions/62038398/bash-clearing-the-last-output-correctly
 ###
 __get_terminal_column() {
     stty echo # ensure that input is being echoed on screen
@@ -107,9 +108,10 @@ set_prompt() {
     PS1=''
 
     # Add a new line if the previous command didn't end with one
-    if [ "$(__get_terminal_column)" != 0 ]; then
-        PS1="\n"
-    fi
+    # Note: Uncommenting this *will* break "typeahead" (any text you've typed before the prompt is visible, will disappear)
+    # if [ "$(__get_terminal_column)" != 0 ]; then
+    #     PS1="\n"
+    # fi
 
     PS1+='\[\033]0;${PWD//[^[:ascii:]]/?}\007\]' # set window title
 
