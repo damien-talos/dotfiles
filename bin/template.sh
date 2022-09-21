@@ -1,6 +1,6 @@
 #!/bin/bash
 # --------------------------------------------- #
-# Quickly / easily review a github pull request #
+# SCRIPT DESCRIPTION GOES HERE #
 # --------------------------------------------- #
 
 # Get command info
@@ -13,13 +13,11 @@ RESET='\e[00m'
 # BEGIN SCRIPT VARIABLES
 [ -n "$VERBOSE" ] || VERBOSE=0
 [ -n "$OPEN_EDITOR" ] || OPEN_EDITOR=1
-[ -n "$CREATE_BRANCH" ] || CREATE_BRANCH=0
 [ -n "$YARN_INSTALL" ] || YARN_INSTALL=1
 [ -n "$PULL_REQUEST_ID" ] || PULL_REQUEST_ID=
-[ -n "$BRANCH_NAME" ] || BRANCH_NAME=
-[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="/tmp/ramdisk"
-[ -n "$CHECKOUT_PATH" ] || CHECKOUT_PATH=
-[ -n "$GIT_ROOT" ] || GIT_ROOT="${HOME}/workspace/talos/Ava-UI"
+[ -n "$BRANCH_NAME" ] || BRANCH_NAME=""
+[ -n "$CHECKOUT_PATH" ] || CHECKOUT_PATH=""
+[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="~/workspace/talos/Ava-UI"
 [ -n "$ECHO_CURRENT_DIR" ] || ECHO_CURRENT_DIR=0
 # END SCRIPT VARIABLES
 
@@ -63,8 +61,6 @@ while [ "$#" -ne "$NARGS" ]; do
         VERBOSE=$((VERBOSE + 1)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
     -e | --edit) # Open editor after checkout (DEFAULT: $OPEN_EDITOR)
         shift && OPEN_EDITOR=1 && vrb "#-INFO: OPEN_EDITOR=$OPEN_EDITOR" ;;
-    -c | --create-branch) # Create the branch if needed
-        shift && CREATE_BRANCH=1 && vrb "#-INFO: CREATE_BRANCH=$CREATE_BRANCH" ;;
     -ne | --no-edit) # Don't open editor after checkout (DEFAULT: $((1-OPEN_EDITOR)))
         shift && OPEN_EDITOR=0 && vrb "#-INFO: OPEN_EDITOR:$OPEN_EDITOR" ;;
     -i | --install) # Run "yarn install" after checkout (DEFAULT: $YARN_INSTALL)
@@ -75,12 +71,10 @@ while [ "$#" -ne "$NARGS" ]; do
         shift && PULL_REQUEST_ID="$1" && shift && vrb "#-INFO: PULL_REQUEST_ID=$PULL_REQUEST_ID" ;;
     -br | --branch) # Name of branch to checkout (if not specified, will be the branch for the specified pull request) (DEFAULT: $BRANCH_NAME)
         shift && BRANCH_NAME="$1" && shift && vrb "#-INFO: BRANCH_NAME=$BRANCH_NAME" ;;
-    -w | --worktree-root) # Root path to the worktree location (DEFAULT: ${GIT_WORKTREE_ROOT})
-        shift && GIT_WORKTREE_ROOT="$1" && shift && vrb "#-INFO: GIT_WORKTREE_ROOT=$GIT_WORKTREE_ROOT" ;;
-    -path | --checkout-path) # Path to checkout into (DEFAULT: ${CHECKOUT_PATH:-${GIT_WORKTREE_ROOT}\${PULL_REQUEST_ID\}})
+    -path | --checkout-path) # Path to checkout into (DEFAULT: ${CHECKOUT_PATH:-/tmp/ramdisk/pr\$PULL_REQUEST_ID})
         shift && CHECKOUT_PATH="$1" && shift && vrb "#-INFO: CHECKOUT_PATH=$CHECKOUT_PATH" ;;
-    -root | --git-worktree-root) # Main git path (DEFAULT: ${GIT_ROOT:-${HOME}/workspace/talos/Ava-UI})
-        shift && GIT_ROOT="$1" && shift && vrb "#-INFO: GIT_ROOT=$GIT_ROOT" ;;
+    -root | --git-worktree-root) # Main git path (DEFAULT: ${GIT_WORKTREE_ROOT:-~/workspace/talos/Ava-UI})
+        shift && GIT_WORKTREE_ROOT="$1" && shift && vrb "#-INFO: GIT_WORKTREE_ROOT=$GIT_WORKTREE_ROOT" ;;
     -ecd | --echo-cd) # Echo the CWD before exit (to allow calling function to cd / source) (DEFAULT: $ECHO_CURRENT_DIR)
         shift && ECHO_CURRENT_DIR=1 && vrb "#-INFO: ECHO_CURRENT_DIR=$ECHO_CURRENT_DIR" ;;
     *) # unknown option, save it in an array for later
@@ -96,24 +90,9 @@ done
 
 set -- "${POSITIONAL[@]}"
 
-if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
-    if [[ "$1" =~ ^[0-9]+$ ]]; then
-        PULL_REQUEST_ID="${PULL_REQUEST_ID:-$1}"
-        CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/pr${PULL_REQUEST_ID}}")
-    else
-        BRANCH_NAME="${BRANCH_NAME:-$1}"
-        shift
-        CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/${BRANCH_NAME}}")
-    fi
-fi
-
-GIT_ROOT=$(realpath "${GIT_ROOT}")
-if [[ $CREATE_BRANCH == 1 ]]; then
-    source="${1:-origin/HEAD}"
-    git sync && git branch -c "${source}" "damien/${BRANCH_NAME#damien/}"
-
-fi
-
+PULL_REQUEST_ID="${PULL_REQUEST_ID:-$1}"
+CHECKOUT_PATH=$(realpath "${CHECKOUT_PATH:-/tmp/ramdisk/pr$PULL_REQUEST_ID}")
+GIT_WORKTREE_ROOT=$(realpath "${GIT_WORKTREE_ROOT}")
 if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
     dbg "BRANCH_NAME not set, evaluating based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
     BRANCH_NAME=$(curl -s \
@@ -124,12 +103,6 @@ if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
     if [ $? -ne 0 ]; then
         die "Error retrieving branch name from github" 1
     fi
-fi
-
-if [ -n "$PULL_REQUEST_ID" ]; then
-    CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${PULL_REQUEST_ID}}")
-elif [ -n "$BRANCH_NAME" ]; then
-    CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${BRANCH_NAME}}")
 fi
 
 if [ $VERBOSE -gt 0 ]; then
@@ -143,30 +116,21 @@ fi
 
 if [ -d "${CHECKOUT_PATH}" ]; then
     dbg "${CHECKOUT_PATH} exists"
-    cd "${CHECKOUT_PATH}" || exit
+    cd "${CHECKOUT_PATH}"
 
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD) || die "Error getting current branch name in ${CHECKOUT_PATH}" $?
     dbg "Current branch = ${CURRENT_BRANCH}"
 
     if [ "$CURRENT_BRANCH" != "$BRANCH_NAME" ]; then
-        git -C "${GIT_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
+        git -C "${GIT_WORKTREE_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
         git switch $BRANCH_NAME || die "Error switching from $CURRENT_BRANCH to $BRANCH_NAME" $?
     fi
-    git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null && (git pull --ff-only || die "Error pulling latest changes for $BRANCH_NAME" $?)
+    git pull --ff-only || die "Error pulling latest changes for $BRANCH_NAME" $?
 else
-    mkdir -p "$(realpath -m "${CHECKOUT_PATH}"/..)"
-    git -C "${GIT_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
-    git -C "${GIT_ROOT}" worktree add "${CHECKOUT_PATH}" $BRANCH_NAME || die "Error adding worktree for PR$PULL_REQUEST_ID ($BRANCH_NAME)" $?
+    git -C "${GIT_WORKTREE_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
+    git -C "${GIT_WORKTREE_ROOT}" worktree add "${CHECKOUT_PATH}" $BRANCH_NAME || die "Error adding worktree for PR$PULL_REQUEST_ID ($BRANCH_NAME)" $?
 fi
-
-if [[ $OPEN_EDITOR == 1 ]]; then
-    if [ -f "${CHECKOUT_PATH}/ava-ui.code-workspace" ]; then
-        code "${CHECKOUT_PATH}/ava-ui.code-workspace"
-    else
-        code "${CHECKOUT_PATH}"
-    fi
-fi
-
-[[ $YARN_INSTALL == 1 ]] && (cd "${CHECKOUT_PATH}" && yarn install)
-[[ $ECHO_CURRENT_DIR == 1 ]] && realpath -L -P "${CHECKOUT_PATH}"
+[[ $OPEN_EDITOR == 1 ]] && code "${CHECKOUT_PATH}"
+[[ $YARN_INSTALL == 1 ]] && yarn install --cwd "${CHECKOUT_PATH}"
+[[ $ECHO_CURRENT_DIR == 1 ]] && echo $(realpath -L -P "${CHECKOUT_PATH}")
 exit 0

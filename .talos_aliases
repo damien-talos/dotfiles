@@ -298,7 +298,7 @@ function gateway_ids() {
     yq e '.Gateways.* | { path| .[-1]: .MarketID}' config/gateways/$env.yml
 }
 
-function _pg_tunnel_complete {
+function _talos_fn_complete {
     COMPREPLY=()
     case $COMP_CWORD in
     1)
@@ -312,7 +312,7 @@ function _pg_tunnel_complete {
 
     esac
 }
-complete -F _pg_tunnel_complete pg_tunnel gcp_exec cust_fix_tunnel local_tunnel project_for_instance zone_for_instance pull_from_gcp push_to_gcp
+complete -F _talos_fn_complete pg_tunnel gcp_exec cust_fix_tunnel local_tunnel project_for_instance zone_for_instance pull_from_gcp push_to_gcp
 
 source "${BIN_DIR}/prod-aliases.sh"
 source "${BIN_DIR}/uat-aliases.sh"
