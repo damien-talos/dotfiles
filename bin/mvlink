@@ -89,8 +89,8 @@ while [ $# -gt 1 ]; do
         case "$target" in
         /*) : ;;
         *)
-            target=$(realpath ${target%*/})
-            original=$(realpath "${original%*/}")
+            target=$(readlink -f ${target%*/})
+            original=$(readlink -f "${original%*/}")
             ;;
         esac
         ;;

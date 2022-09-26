@@ -1,5 +1,4 @@
-#!/bin/bash -x
-BIN_DIR="$HOME/workspace/talos/talos/dotfiles"
+BIN_DIR="$HOME/workspace/talos/dotfiles/generated"
 # local red="printf %b '\e]11;#440000\\a\\'"
 # local orange="printf %b '\e]11;#cc7000\\a\\'"
 # local green="printf %b '\e]11;#155600\\a\\'"
@@ -312,10 +311,10 @@ function _talos_fn_complete {
 
     esac
 }
-complete -F _talos_fn_complete pg_tunnel gcp_exec cust_fix_tunnel local_tunnel project_for_instance zone_for_instance pull_from_gcp push_to_gcp
+[ "$SHELL" = "/bin/bash" ] && complete -F _talos_fn_complete pg_tunnel gcp_exec cust_fix_tunnel local_tunnel project_for_instance zone_for_instance pull_from_gcp push_to_gcp
 
-source "${BIN_DIR}/prod-aliases.sh"
-source "${BIN_DIR}/uat-aliases.sh"
+[ -e "${BIN_DIR}/prod-aliases.sh" ] && source "${BIN_DIR}/prod-aliases.sh"
+[ -e "${BIN_DIR}/uat-aliases.sh" ] && source "${BIN_DIR}/uat-aliases.sh"
 
 alias startStaging='([ -d apps/ava ] && cd apps/ava; BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:staging --verbose --progress | cat)'
 alias startUat='([ -d apps/ava ] && cd apps/ava; BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:uat --verbose --progress | cat)'

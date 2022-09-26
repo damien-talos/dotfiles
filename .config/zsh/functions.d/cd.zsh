@@ -74,4 +74,4 @@ function _cd {
     fi
 }
 alias cd=_cd
-complete -F _cd_complete -o nospace cd
+# complete -F _cd_complete -o nospace cd

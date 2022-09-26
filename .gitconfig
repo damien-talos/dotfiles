@@ -37,6 +37,7 @@
 	gpgsign = true
 [core]
 	editor = code -w
+	symlinks = true
 [credential]
 	helper = store
 [diff]
@@ -87,4 +88,4 @@
 [user]
 	name = Damien Schoof
 	email = damien.schoof@talostrading.com
-	signingkey = D3EEE8ED641E7E71
+	signingkey = 49FDCFAFA9AA0503D355E81BB855C12972C8E38F

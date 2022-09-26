@@ -99,15 +99,15 @@ set -- "${POSITIONAL[@]}"
 if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     if [[ "$1" =~ ^[0-9]+$ ]]; then
         PULL_REQUEST_ID="${PULL_REQUEST_ID:-$1}"
-        CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/pr${PULL_REQUEST_ID}}")
+        CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/pr${PULL_REQUEST_ID}}")
     else
         BRANCH_NAME="${BRANCH_NAME:-$1}"
         shift
-        CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/${BRANCH_NAME}}")
+        CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/${BRANCH_NAME}}")
     fi
 fi
 
-GIT_ROOT=$(realpath "${GIT_ROOT}")
+GIT_ROOT=$(readlink -f "${GIT_ROOT}")
 if [[ $CREATE_BRANCH == 1 ]]; then
     source="${1:-origin/HEAD}"
     git sync && git branch -c "${source}" "damien/${BRANCH_NAME#damien/}"
@@ -127,9 +127,9 @@ if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
 fi
 
 if [ -n "$PULL_REQUEST_ID" ]; then
-    CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${PULL_REQUEST_ID}}")
+    CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${PULL_REQUEST_ID}}")
 elif [ -n "$BRANCH_NAME" ]; then
-    CHECKOUT_PATH=$(realpath -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${BRANCH_NAME}}")
+    CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${BRANCH_NAME}}")
 fi
 
 if [ $VERBOSE -gt 0 ]; then
@@ -154,7 +154,7 @@ if [ -d "${CHECKOUT_PATH}" ]; then
     fi
     git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null && (git pull --ff-only || die "Error pulling latest changes for $BRANCH_NAME" $?)
 else
-    mkdir -p "$(realpath -m "${CHECKOUT_PATH}"/..)"
+    mkdir -p "$(readlink -f -m "${CHECKOUT_PATH}"/..)"
     git -C "${GIT_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
     git -C "${GIT_ROOT}" worktree add "${CHECKOUT_PATH}" $BRANCH_NAME || die "Error adding worktree for PR$PULL_REQUEST_ID ($BRANCH_NAME)" $?
 fi
@@ -168,5 +168,5 @@ if [[ $OPEN_EDITOR == 1 ]]; then
 fi
 
 [[ $YARN_INSTALL == 1 ]] && (cd "${CHECKOUT_PATH}" && yarn install)
-[[ $ECHO_CURRENT_DIR == 1 ]] && realpath -L -P "${CHECKOUT_PATH}"
+[[ $ECHO_CURRENT_DIR == 1 ]] && readlink "${CHECKOUT_PATH}"
 exit 0
