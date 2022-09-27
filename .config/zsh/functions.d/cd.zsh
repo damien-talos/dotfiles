@@ -44,11 +44,11 @@ function _cd_complete {
 # Replace builtin `cd` command with a custom one that uses `pushd` instead
 function _cd {
     # typing just `_cd` will take you home ;)
-    if [ "$1" == "" ]; then
+    if [[ "$1" == "" ]]; then
         pushd ~ >/dev/null || return
 
     # use `_cd -` to visit previous directory
-    elif [ "$1" == "-" ]; then
+    elif [[ "$1" == "-" ]]; then
         popd >/dev/null || return
 
     # use `_cd -n` to go n directories back in history
@@ -58,7 +58,7 @@ function _cd {
         done
         popd >/dev/null || return
     # use `_cd -- <path>` if your path begins with a dash
-    elif [ "$1" == "--" ]; then
+    elif [[ "$1" == "--" ]]; then
         shift
         pushd -- "$@" >/dev/null || return
 
@@ -75,3 +75,5 @@ function _cd {
 }
 alias cd=_cd
 # complete -F _cd_complete -o nospace cd
+
+# _cd ~/workspace/talos

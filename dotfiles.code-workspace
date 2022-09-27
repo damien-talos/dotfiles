@@ -1,15 +1,21 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../talos/talos/dotfiles",
-			"name": "Talos Generated Dotfiles"
-		},
-		{
-			"path": "../talos/dotfiles"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {},
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "zshdb",
+        "request": "launch",
+        "name": "Zsh-Debug (simplest configuration)",
+        "terminalKind": "integrated",
+        "cwd": ".",
+        "program": "${file}"
+      }
+    ]
+  }
 }

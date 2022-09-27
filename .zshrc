@@ -1,7 +1,8 @@
+#!/bin/zsh
+# shellcheck shell=zsh
 autoload -Uz compinit && compinit
 
-[ -e ~/.zshenv ] && . ~/.zshenv || echo '~/.zshenv does not exist'
-[ -e ~/.zsh_aliases ] && . ~/.zsh_aliases || echo '~/.zsh_aliases does not exist'
+source_or_err ~/.zsh_aliases
 
 # Functions are split to individual script files for readability
 if [ -d ~/.config/zsh/functions.d ]; then

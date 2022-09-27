@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 ####################
 ### PROMPT SETUP ###
 ####################
@@ -28,7 +29,7 @@ trap 'pre_command' DEBUG
 function timer_stop {
     declare timer_start=$1
     declare timer_show
-    declare delta_us=$((($(timer_now) - $timer_start) / 1000))
+    declare delta_us=$((($(timer_now) - timer_start) / 1000))
     declare us=$((delta_us % 1000))
     declare ms=$(((delta_us / 1000) % 1000))
     declare s=$(((delta_us / (1000 * 1000)) % 60))
@@ -72,8 +73,8 @@ set_git_prompt() {
     unset GIT_PS1_SHOWUPSTREAM       # don't enable, too slow
     export GIT_PS1_OMITSPARSESTATE=1 # disables another check
 
-    test -f "$COMPLETION_PATH/git-completion.bash" && . "$COMPLETION_PATH/git-completion.bash" || echo "Warning: couldn't find git-completion.bash"
-    test -f "$COMPLETION_PATH/git-prompt.sh" && . "$COMPLETION_PATH/git-prompt.sh" || echo "Warning: couldn't find git-prompt.sh"
+    source_or_err "$COMPLETION_PATH/git-completion.bash"
+    source_or_err "$COMPLETION_PATH/git-prompt.sh"
 }
 
 ###
@@ -89,12 +90,12 @@ __get_terminal_column() {
 
     IFS='[;' read -p $'\e[6n' -d R -a pos -rs || echo "${FUNCNAME[0]} failed with error: $? ; ${pos[*]}"
     #echo "$((${pos[1]} - 1))" # row
-    echo "$((${pos[2]} - 1))" # column
+    echo "$((pos[2] - 1))" # column
 }
 
 set_prompt() {
     # Escape code definitions
-    PromptBlue='\[\e[01;34m\]'
+    # PromptBlue='\[\e[01;34m\]'
     PromptCyan='\[\e[01;36m\]'
     PromptBrownYellow='\[\e[00;33m\]'
     PromptWhite='\[\e[01;37m\]'
@@ -150,14 +151,15 @@ prompt_command() {
     AT_PROMPT=1
 
     if [[ $FIRST_PROMPT -ne 1 ]]; then
-        last_command_run_time=$(timer_stop $last_command_start) # stop the timer for the last command we ran
+        last_command_run_time=$(timer_stop "$last_command_start") # stop the timer for the last command we ran
         unset last_command_start
     else
         set_git_prompt # Initial setup for git prompt, sources the git prompt file and completion scripts one time at startup
     fi
 
-    set_prompt                      # set the actual prompt displayed
-    export date=$(date +"%Y-%m-%d") # Set the current date as a variable
+    set_prompt               # set the actual prompt displayed
+    DATE=$(date +"%Y-%m-%d") # Set the current date as a variable
+    export DATE
 
     save_history # Save the history so it is shared across sessions
 
@@ -169,7 +171,7 @@ prompt_command() {
 # Show the time taken to execute various parts of the prompt_command
 show_prompt_timings() {
     declare -n timings # variable reference by name - set to the name of the variable that we want to display
-    [[ $# -gt 0 ]] && { timings="$1"; } || { timings='prompt_timings'; }
+    if [[ $# -gt 0 ]]; then timings="$1"; else timings='prompt_timings'; fi
     for t in "${!timings[@]}"; do
         printf "%-32s %s\n" "$t" "${timings[$t]}"
     done | sort -n

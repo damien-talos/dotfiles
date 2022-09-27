@@ -1,6 +1,7 @@
+#!/bin/sh
 # enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+if [[ -x /usr/bin/dircolors ]]; then
+    if [[ -r ~/.dircolors ]]; then eval "$(dircolors -b ~/.dircolors)"; else eval "$(dircolors -b)"; fi
     alias ls='ls --color=auto'
 
     alias grep='grep --color=auto'
@@ -16,7 +17,7 @@ case "$SHELL" in
     alias lspath="which \$(compgen -A function -abck) | sort -u"
     ;;
 /bin/zsh)
-    alias resource='source ~/.zshrc'
+    alias resource='source ~/.zshenv && source ~/.zshrc'
     alias edrc='$EDITOR ~/.zshrc'
     alias ls="ls -G"
     ;;
@@ -25,10 +26,11 @@ esac
 alias la='ls --color=auto -alF'
 alias ll='la'
 
+# shellcheck disable=2142
 alias current-paths='echo $PATH | awk -F : '"'"'BEGIN {OFS="\n"}; {$1=$1; print $0}'"'"
 
 alias dirs='dirs -v'
 
-alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
+# alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
 
-[ -e ~/.talos_aliases ] && . ~/.talos_aliases
+source_or_err ~/.talos_aliases

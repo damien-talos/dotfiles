@@ -30,11 +30,8 @@ clear() {
         # Magic to clear log file directories easily
         case "$1" in
         # BEGIN_KNOWN_ALIASES
-        DevBarracuda)
-            if [ -d "/c/dev/bfx/Logs/Dev.Barracuda/$date" ]; then clear /c/dev/bfx/Logs/Dev.Barracuda/$date/*; fi
-            ;;
-        DevEcomFX)
-            if [ -d "/c/dev/bfx/Logs/Dev.EcomFX/$date" ]; then clear /c/dev/bfx/Logs/Dev.EcomFX/$date/*; fi
+        dev.local)
+            if [[ -d "~/workspace/talos/ava/logs" ]]; then clear /c/dev/bfx/Logs/Dev.Barracuda/*; fi
             ;;
         # END_KNOWN_ALIASES
         *)

@@ -9,19 +9,21 @@
 shopt -s extglob globstar
 
 PATH=~/.yarn/bin:~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
+PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
 export PATH
 export EDITOR=code
 export FZF_DEFAULT_COMMAND='fd'
 export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."
-export GITHUB_TOKEN=$(cat ~/.github_token)
+GITHUB_TOKEN=$(cat ~/.github_token)
+export GITHUB_TOKEN
 
 # Escape code definitions
-BLUE='\e[01;34m'
-CYAN='\e[01;36m'
-WHITE='\e[01;37m'
+# BLUE='\e[01;34m'
+# CYAN='\e[01;36m'
+# WHITE='\e[01;37m'
 RED='\e[01;31m'
-GREEN='\e[01;32m'
-STRIKETRHOUGH='\e[9m'
+# GREEN='\e[01;32m'
+# STRIKETRHOUGH='\e[9m'
 RESET='\e[00m'
 
 # Shell settings
@@ -50,11 +52,13 @@ fi
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+  # shellcheck disable=1091
   . /etc/bash_completion
 fi
 
 source_or_err() {
   if [ -f "$1" ]; then
+    # shellcheck disable=1090
     . "$1"
   else
     echo -e "${RED}Unable to find and source $1${RESET}"
@@ -70,8 +74,9 @@ source_or_err "${HOME}/.bash_aliases"
 # Functions are split to individual script files for readability
 if [ -d ~/.config/bash/functions.d ]; then
   for i in ~/.config/bash/functions.d/*.bash; do
-    if [ -r $i ]; then
-      source $i
+    if [ -r "$i" ]; then
+      # shellcheck disable=1090
+      source_or_err "$i"
     fi
   done
   unset i
@@ -80,15 +85,12 @@ fi
 # source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
 # bind -x '"\t": fzf_bash_completion'
 
-# shellcheck source=/dev/null
 source_or_err "$HOME/.cargo/env"
 source_or_err "/etc/profile.d/rvm.sh" # This loads rvm
 
 export NVM_DIR="$HOME/.nvm"
-# shellcheck source=/dev/null
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-# shellcheck source=/dev/null
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+source_or_err "$NVM_DIR/nvm.sh"          # This loads nvm
+source_or_err "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 ### LOAD AVA ENVIRONMENT VARS
 source_or_err "/home/damien/workspace/talos/env/ava-vars.sh"
