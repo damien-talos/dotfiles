@@ -88,4 +88,4 @@
 [user]
 	name = Damien Schoof
 	email = damien.schoof@talostrading.com
-	signingkey = 49FDCFAFA9AA0503D355E81BB855C12972C8E38F
+	signingkey = 49FDCFAFA9AA0503D355E81BB855C12972C8E38F #gitleaks:allow
