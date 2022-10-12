@@ -1,17 +1,24 @@
 [alias]
-	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+	#alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+	# git config --get-regexp '^alias\.' | sed -E 's/alias\.([[:alnum:]]+).*/^\\\\s\\\\+\1\\\\s*=/' | xargs -I'{}' grep -B1 -e '{}' "$HOME"/.gitconfig
+	# alias = "!grep -A1 '###' \"$HOME\"/.gitconfig | awk 'END{if((NR%2))print p}!(NR%2){print$0p}{p=$0}' | sed -re 's/( =)(.*)(###)/:*/g' | awk -F '*' '{printf \"\033[1;31m%-30s\033[0m %s\n\", $1, $2}' | sort"
+	### View all aliases defined in git config
+	alias = "!git config --get-regexp '^alias\\.' | sed -E 's/alias\\.([[:alnum:]]+).*/\\1/' | sort | xargs -I'{}' grep -B1 -e '^\\s\\+{}\\s*=' "$HOME"/.gitconfig | awk '!(NR%2){alias=$0;gsub(/^[[:space:]]*[[:alnum:]]+[[:space:]]*=[[:space:]]*/,\"\",alias);print$0(p==\"\"?\"    ### \\033[3m\\033[2m\"alias\"\\033[0m\":p)}{($0 ~ /###/?p=$0:p=\"\")}'  | sed -re 's/( =)(.*)(###)/:*/g' | awk -F '*' '{printf \"\\033[1;31m%-30s\\033[0m %s\\n\", $1, $2}' | sort"
 	# branches = branch -v
 	# cleanup = !git branch --merged | grep -v '(^(\\*|\\+))' | xargs --no-run-if-empty git branch -d
 	cleanup-gone = !git branch -a --format='%(refname:short) %(upstream:track)' | grep '\\[gone\\]' | awk '{print $1}'
 	# co = checkout
 	cp = cherry-pick -x
-	# edrc = config -e
+	### Debug git aliases - 'git debug <alias>'
+	debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+	edrc = config -e
 	# g = grep --break --heading --line-number
 	gedrc = config -e --global
 	# heads = branch -vv
 	hist = log --pretty=onelinelog --date=short --graph --color=always
 	# missing = !git fetch -q && git ls-remote --refs | grep --color=always unsynced
-	newbranch = "!f() { target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; git sync; git switch --no-track -c \"damien/${target#damien/}\" \"${source}\" \"$@\"; }; f"
+	### Create a new git branch
+	newbranch = "!f() { target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\\1/'); git sync; echo git switch --no-track -c \"${user}/${target#${user}/}\" \"${source}\" \"$@\"; }; f"
 	# pick = cherry-pick -x --edit
 	pushf = push --force-with-lease
 	pushup = -c push.default=current push -u
