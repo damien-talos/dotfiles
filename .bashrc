@@ -18,13 +18,13 @@ GITHUB_TOKEN=$(cat ~/.github_token)
 export GITHUB_TOKEN
 
 # Escape code definitions
-# BLUE='\e[01;34m'
-# CYAN='\e[01;36m'
-# WHITE='\e[01;37m'
-RED='\e[01;31m'
-# GREEN='\e[01;32m'
-# STRIKETRHOUGH='\e[9m'
-RESET='\e[00m'
+# BLUE='\033[01;34m'
+# CYAN='\033[01;36m'
+# WHITE='\033[01;37m'
+RED='\033[01;31m'
+# GREEN='\033[01;32m'
+# STRIKETRHOUGH='\033[9m'
+RESET='\033[00m'
 
 # Shell settings
 HISTCONTROL=ignoreboth:erasedups             # Save only one copy of the command

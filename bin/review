@@ -7,8 +7,8 @@
 CMD_PWD=$(pwd)
 CMD="$0"
 CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
-RED='\e[01;31m'
-RESET='\e[00m'
+RED="\033[01;31m"
+RESET="\033[00m"
 
 # BEGIN SCRIPT VARIABLES
 [ -n "$VERBOSE" ] || VERBOSE=0
@@ -110,8 +110,14 @@ fi
 GIT_ROOT=$(readlink -f "${GIT_ROOT}")
 if [[ $CREATE_BRANCH == 1 ]]; then
     source="${1:-origin/HEAD}"
-    git sync && git branch -c "${source}" "damien/${BRANCH_NAME#damien/}"
-
+    user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\1/')
+    NEW_BRANCH_NAME="${user}/${BRANCH_NAME/^${user}/}"
+    git sync
+    git branch "${NEW_BRANCH_NAME}" "${source}"
+    if [ $? -ne 0 ]; then
+        die "Error creating new branch ${NEW_BRANCH_NAME}" 1
+    fi
+    BRANCH_NAME="${NEW_BRANCH_NAME}"
 fi
 
 if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then

@@ -1,4 +1,4 @@
-BASH_SCRIPTS = $(shell find . -type f -name '*bash*')
+  BASH_SCRIPTS = $(shell find . -type f -name '*bash*')
 ZSH_SCRIPTS = $(shell find . -type f -name '*zsh*')
 all: shellcheck
 

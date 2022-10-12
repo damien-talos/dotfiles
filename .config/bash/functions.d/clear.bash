@@ -7,8 +7,8 @@
 CMD_PWD=$(pwd)
 CMD="$0"
 # CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
-RED='\e[01;31m'
-RESET='\e[00m'
+RED='\033[01;31m'
+RESET='\033[00m'
 
 # Show help function to be used below
 clear_show_help() {

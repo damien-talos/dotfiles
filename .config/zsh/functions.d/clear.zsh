@@ -7,8 +7,8 @@
 CMD_PWD=$(pwd)
 CMD="$0"
 # CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
-RED='\e[01;31m'
-RESET='\e[00m'
+RED='\033[01;31m'
+RESET='\033[00m'
 
 # Show help function to be used below
 clear_show_help() {
@@ -18,7 +18,7 @@ clear_show_help() {
     echo "ARGS:"
     MSG=$(awk '/# BEGIN_KNOWN_ALIASES/,/# END_KNOWN_ALIASES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -n '/^[[:alpha:]]+\\)/p') # | awk '/^\w/ {printf "  %s\n", $1}')
     echo -e "$MSG"
-    # EMSG=$(eval "echo \"$MSG\"")
+    EMSG=$(eval "echo \"$MSG\"")
     echo "$EMSG"
 }
 
@@ -31,7 +31,7 @@ clear() {
         case "$1" in
         # BEGIN_KNOWN_ALIASES
         dev.local)
-            if [[ -d "~/workspace/talos/ava/logs" ]]; then clear /c/dev/bfx/Logs/Dev.Barracuda/*; fi
+            if [[ -d "~/workspace/talos/ava/logs" ]]; then clear ~/workspace/talos/ava/logs/*; fi
             ;;
         # END_KNOWN_ALIASES
         *)
@@ -47,7 +47,7 @@ clear() {
     fi
 }
 
-if [[ "$0" == "$BASH_SOURCE" ]]; then
+if [[ "$0" == "$ZSH_ARGZERO" ]]; then
     # Script was run as a command
     clear $*
 fi

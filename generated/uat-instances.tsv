@@ -1,0 +1,48 @@
+gke-alpha-default-pool-26fa5b9f-467t        us-east1-b         IPV4_ONLY
+gke-alpha-default-pool-26fa5b9f-9kk6        us-east1-b         IPV4_ONLY
+gke-alpha-default-pool-26fa5b9f-pmpz        us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-5bj8          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-72r8          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-bckb          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-cimg          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-g8rj          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-itis          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-kqz0          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-ocnx          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-oswx          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-pwhz          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-qb1u          us-east1-b         IPV4_ONLY
+gke-ava-default-pool-f2545577-v51q          us-east1-b         IPV4_ONLY
+gke-ava-monitor-default-pool-cd41efd7-a4ei  us-east1-b         IPV4_ONLY
+gke-develop-default-pool-1d135057-cxv0      us-east1-b         IPV4_ONLY
+gke-develop-default-pool-1d135057-rpoe      us-east1-b         IPV4_ONLY
+gke-develop-default-pool-1d135057-z6mr      us-east1-b         IPV4_ONLY
+gke-release-default-pool-e0d6bf74-cybr      us-east1-b         IPV4_ONLY
+gke-release-default-pool-e0d6bf74-drn2      us-east1-b         IPV4_ONLY
+gke-release-default-pool-e0d6bf74-pr6o      us-east1-b         IPV4_ONLY
+gke-staging-default-pool-3c57e1af-jf4s      us-east1-b         IPV4_ONLY
+gke-staging-default-pool-3c57e1af-rmke      us-east1-b         IPV4_ONLY
+gke-staging-default-pool-3c57e1af-x6s3      us-east1-b         IPV4_ONLY
+gke-uat-default-pool-fcece1c8-r9gc          us-east1-b         IPV4_ONLY
+gke-uat-default-pool-fcece1c8-rs8j          us-east1-b         IPV4_ONLY
+gke-uat-default-pool-fcece1c8-skft          us-east1-b         IPV4_ONLY
+jobs-runner-uat                             us-east1-b         IPV4_ONLY
+ws-monitor                                  us-east1-b
+binance-proxy-uat                           asia-northeast1-b  IPV4_ONLY
+ftx-proxy-alpha                             asia-northeast1-b  IPV4_ONLY
+alpha-talos                                 us-east4-a
+alpha-veridian-dynamics                     us-east4-a         IPV4_ONLY
+capture-us-east4-a                          us-east4-a
+certbot-uat                                 us-east4-a         IPV4_ONLY
+develop-talos                               us-east4-a         IPV4_ONLY
+fix-multiplexer-uat                         us-east4-a
+loan-release                                us-east4-a         IPV4_ONLY
+loan-staging                                us-east4-a         IPV4_ONLY
+perf-client                                 us-east4-a         IPV4_ONLY
+release-talos                               us-east4-a         IPV4_ONLY
+sonic-test-6                                us-east4-a         IPV4_ONLY
+staging-perf                                us-east4-a         IPV4_ONLY
+staging-talos                               us-east4-a
+staging-tmp                                 us-east4-a         IPV4_ONLY
+toolbox                                     us-east4-a
+uat-talos                                   us-east4-a

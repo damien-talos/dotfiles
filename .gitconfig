@@ -18,7 +18,7 @@
 	hist = log --pretty=onelinelog --date=short --graph --color=always
 	# missing = !git fetch -q && git ls-remote --refs | grep --color=always unsynced
 	### Create a new git branch
-	newbranch = "!f() { target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\\1/'); git sync; echo git switch --no-track -c \"${user}/${target#${user}/}\" \"${source}\" \"$@\"; }; f"
+	newbranch = "!f() { target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\\1/'); git sync; git switch --no-track -c \"${user}/${target#${user}/}\" \"${source}\" \"$@\"; }; f"
 	# pick = cherry-pick -x --edit
 	pushf = push --force-with-lease
 	pushup = -c push.default=current push -u

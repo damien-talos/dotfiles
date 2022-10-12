@@ -10,10 +10,10 @@ CMD_PWD=$(pwd)
 CMD="$0"
 CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
 RED='\033[01;31m'
-STRIKETHROUGH='\e[9m'
+STRIKETHROUGH='\033[9m'
 RESET='\033[00m'
 
-ansi() { echo -en "\e[${1}m${*:2}\e[0m"; }
+ansi() { echo -en "\033[${1}m${*:2}\033[0m"; }
 bold() { ansi 1 "$@"; }
 italic() { ansi 3 "$@"; }
 underline() { ansi 4 "$@"; }

@@ -1,5 +1,8 @@
 review() {
-    OUTPUT=$(~/bin/review --echo-cd "$@" | tee /dev/tty | tail -n 1)
+    OUTPUT=$(
+        set -o pipefail
+        ~/bin/review --echo-cd "$@" | tee /dev/tty | tail -n 1
+    )
     if [ $? -eq 0 ] && [ -n "$OUTPUT" ] && [ -d "$OUTPUT" ]; then
         cd "$OUTPUT" || return 0
         return 0
@@ -26,7 +29,10 @@ unreview() {
 
 work-on() {
     GIT_WORKTREE_ROOT=~/workspace/talos/avatrees/
-    OUTPUT=$(GIT_WORKTREE_ROOT="${GIT_WORKTREE_ROOT}" ~/bin/review --echo-cd "$@" | tee /dev/tty | tail -n 1)
+    OUTPUT=$(
+        set -eu -o pipefail
+        GIT_WORKTREE_ROOT="${GIT_WORKTREE_ROOT}" ~/bin/review --echo-cd "$@" | tee /dev/tty | tail -n 1
+    )
     if [ $? -eq 0 ] && [ -n "$OUTPUT" ] && [ -d "$OUTPUT" ]; then
         cd "$OUTPUT" || return 0
         return 0

@@ -88,20 +88,20 @@ __get_terminal_column() {
 
     local pos
 
-    IFS='[;' read -p $'\e[6n' -d R -a pos -rs || echo "${FUNCNAME[0]} failed with error: $? ; ${pos[*]}"
+    IFS='[;' read -p $'\033[6n' -d R -a pos -rs || echo "${FUNCNAME[0]} failed with error: $? ; ${pos[*]}"
     #echo "$((${pos[1]} - 1))" # row
     echo "$((pos[2] - 1))" # column
 }
 
 set_prompt() {
     # Escape code definitions
-    # PromptBlue='\[\e[01;34m\]'
-    PromptCyan='\[\e[01;36m\]'
-    PromptBrownYellow='\[\e[00;33m\]'
-    PromptWhite='\[\e[01;37m\]'
-    PromptRed='\[\e[01;31m\]'
-    PromptGreen='\[\e[01;32m\]'
-    PromptReset='\[\e[00m\]'
+    # PromptBlue='\[\033[01;34m\]'
+    PromptCyan='\[\033[01;36m\]'
+    PromptBrownYellow='\[\033[00;33m\]'
+    PromptWhite='\[\033[01;37m\]'
+    PromptRed='\[\033[01;31m\]'
+    PromptGreen='\[\033[01;32m\]'
+    PromptReset='\[\033[00m\]'
     PromptFancyX='\342\234\227'
     PromptCheckmark='\[\342\234\]\223'
 

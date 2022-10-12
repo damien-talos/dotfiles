@@ -1,15 +1,14 @@
 #!/bin/env zsh
 
-PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+PATH="$HOME/bin:/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 # Remove duplicate entries from PATH - this can happen if we re-source our files
-PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
 export PATH
 export EDITOR=code
 GITHUB_TOKEN=$(cat ~/.github_token)
 export GITHUB_TOKEN
 
-RED='\e[01;31m'
-RESET='\e[00m'
+RED='\033[01;31m'
+RESET='\033[00m'
 
 source_or_err() {
   if [ -f "$1" ]; then
@@ -27,3 +26,5 @@ source_or_err /Users/damien.schoof/workspace/talos/env/ava-vars.sh
 
 export NVM_DIR="$HOME/.nvm"
 source_or_err "$NVM_DIR/nvm.sh" # This loads nvm
+
+PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
