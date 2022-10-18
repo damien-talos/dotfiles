@@ -1,4 +1,4 @@
-#!/bin/sh
+# shellcheck shell=bash
 # enable color support of ls and also add handy aliases
 if [[ -x /usr/bin/dircolors ]]; then
     if [[ -r ~/.dircolors ]]; then eval "$(dircolors -b ~/.dircolors)"; else eval "$(dircolors -b)"; fi
@@ -9,19 +9,17 @@ if [[ -x /usr/bin/dircolors ]]; then
     alias egrep='egrep --color=auto'
 fi
 
-case "$SHELL" in
-/bin/bash)
+current_shell=$(ps -o comm= $$)
+if [[ "${current_shell}" =~ bash ]]; then
     alias resource='source ~/.bashrc'
     alias edrc='$EDITOR ~/.bashrc'
     alias ls='lsd'
     alias lspath="which \$(compgen -A function -abck) | sort -u"
-    ;;
-/bin/zsh)
+elif [[ "${current_shell}" =~ zsh ]]; then
     alias resource='source ~/.zshenv && source ~/.zshrc'
     alias edrc='$EDITOR ~/.zshrc'
     alias ls="ls -G"
-    ;;
-esac
+fi
 
 alias la='ls --color=auto -alF'
 alias ll='la'

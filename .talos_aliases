@@ -24,12 +24,27 @@ function regen_instances() {
     list_uat_instances | sed '1d' >"${BIN_DIR}/uat-instances.tsv"
 }
 
+function terminal_bg_color() {
+    exec </dev/tty
+    oldstty=$(stty -g)
+    stty raw -echo min 0
+    col=11 # background
+    #          OSC   Ps  ;Pt ST
+    echo -en "\033]${col};?\033\\" >/dev/tty # echo opts differ w/ OSes
+    result=
+    if IFS=';' read -r -d '\' color; then
+        result=$(echo $color | sed 's/^.*\;//;s/[^rgb:0-9a-f/]//g')
+    fi
+    stty $oldstty
+    echo $result
+}
+
 #Creates aliases for connecting to the instances
 function regen_aliases() {
-    local red="printf %b '\\033]11;#440000\a'"
+    local red="printf %b '\\\\033]11;#440000\\\\a'"
     # local orange="printf %b '\033]11;#cc7000\\a\\'"
     # local green="printf %b '\033]11;#155600\\a\\'"
-    local back="printf %b '\\033]11;#333333\a'"
+    local back="printf %b '\\\\033]11;\$(terminal_bg_color)\\\\a'"
 
     regen_instances
 
@@ -37,12 +52,12 @@ function regen_aliases() {
     echo "#!/bin/bash" >"${BIN_DIR}/prod-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/prod-aliases.sh"
 
-    cat "${BIN_DIR}/prod-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/prod-aliases.sh"
+    cat "${BIN_DIR}/prod-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s)\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/prod-aliases.sh"
 
     echo "Regenerating uat aliases to "${BIN_DIR}/uat-aliases.sh
     echo "#!/bin/bash" >"${BIN_DIR}/uat-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/uat-aliases.sh"
-    cat "${BIN_DIR}/uat-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/uat-aliases.sh"
+    cat "${BIN_DIR}/uat-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s)\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/uat-aliases.sh"
 
     source "${BIN_DIR}/prod-aliases.sh"
     source "${BIN_DIR}/uat-aliases.sh"
