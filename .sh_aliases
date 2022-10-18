@@ -25,6 +25,7 @@ esac
 
 alias la='ls --color=auto -alF'
 alias ll='la'
+alias tools='echo "gron\nyq"'
 
 # shellcheck disable=2142
 alias current-paths='echo $PATH | awk -F : '"'"'BEGIN {OFS="\n"}; {$1=$1; print $0}'"'"

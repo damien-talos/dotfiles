@@ -2,6 +2,7 @@
 # --------------------------------------------- #
 # Quickly / easily review a github pull request #
 # --------------------------------------------- #
+set -o pipefail
 
 # Get command info
 CMD_PWD=$(pwd)
@@ -17,7 +18,7 @@ RESET="\033[00m"
 [ -n "$YARN_INSTALL" ] || YARN_INSTALL=1
 [ -n "$PULL_REQUEST_ID" ] || PULL_REQUEST_ID=
 [ -n "$BRANCH_NAME" ] || BRANCH_NAME=
-[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="/tmp/ramdisk"
+[ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="${HOME}/workspace/talos/avatrees"
 [ -n "$CHECKOUT_PATH" ] || CHECKOUT_PATH=
 [ -n "$GIT_ROOT" ] || GIT_ROOT="${HOME}/workspace/talos/Ava-UI"
 [ -n "$ECHO_CURRENT_DIR" ] || ECHO_CURRENT_DIR=0
@@ -94,16 +95,20 @@ while [ "$#" -ne "$NARGS" ]; do
     esac
 done
 
+if [[ $VERBOSE -gt 2 ]]; then
+    set -x
+fi
+
 set -- "${POSITIONAL[@]}"
 
 if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     if [[ "$1" =~ ^[0-9]+$ ]]; then
         PULL_REQUEST_ID="${PULL_REQUEST_ID:-$1}"
-        CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/pr${PULL_REQUEST_ID}}")
+        CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/pr${PULL_REQUEST_ID}}"
     else
         BRANCH_NAME="${BRANCH_NAME:-$1}"
         shift
-        CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/${BRANCH_NAME}}")
+        CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/${BRANCH_NAME}}"
     fi
 fi
 
@@ -133,9 +138,9 @@ if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
 fi
 
 if [ -n "$PULL_REQUEST_ID" ]; then
-    CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${PULL_REQUEST_ID}}")
+    CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${PULL_REQUEST_ID}}"
 elif [ -n "$BRANCH_NAME" ]; then
-    CHECKOUT_PATH=$(readlink -f -m "${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${BRANCH_NAME}}")
+    CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${BRANCH_NAME}}"
 fi
 
 if [ $VERBOSE -gt 0 ]; then
@@ -147,7 +152,7 @@ if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     die "Either BRANCH_NAME or PULL_REQUEST_ID must be set"
 fi
 
-if [ -d "${CHECKOUT_PATH}" ]; then
+if [ -d "${CHECKOUT_PATH}" ] && [ -d "${CHECKOUT_PATH}/.git" ]; then
     dbg "${CHECKOUT_PATH} exists"
     cd "${CHECKOUT_PATH}" || exit
 
@@ -160,7 +165,7 @@ if [ -d "${CHECKOUT_PATH}" ]; then
     fi
     git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null && (git pull --ff-only || die "Error pulling latest changes for $BRANCH_NAME" $?)
 else
-    mkdir -p "$(readlink -f -m "${CHECKOUT_PATH}"/..)"
+    mkdir -p "${CHECKOUT_PATH}"/..
     git -C "${GIT_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
     git -C "${GIT_ROOT}" worktree add "${CHECKOUT_PATH}" $BRANCH_NAME || die "Error adding worktree for PR$PULL_REQUEST_ID ($BRANCH_NAME)" $?
 fi
@@ -174,5 +179,5 @@ if [[ $OPEN_EDITOR == 1 ]]; then
 fi
 
 [[ $YARN_INSTALL == 1 ]] && (cd "${CHECKOUT_PATH}" && yarn install)
-[[ $ECHO_CURRENT_DIR == 1 ]] && readlink "${CHECKOUT_PATH}"
+[[ $ECHO_CURRENT_DIR == 1 ]] && readlink -f "${CHECKOUT_PATH}"
 exit 0
