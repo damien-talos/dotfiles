@@ -13,10 +13,10 @@ review() {
 
 unreview() {
     local PULL_REQUEST_ID=$1
-    local CHECKOUT_PATH=/tmp/ramdisk/pr$PULL_REQUEST_ID
+    local CHECKOUT_PATH=~/workspace/talos/avatrees/pr$PULL_REQUEST_ID
     local GIT_ROOT=~/workspace/talos/Ava-UI
-    if [ -d $CHECKOUT_PATH ]; then
-        if [ "$(pwd)" == "$CHECKOUT_PATH" ]; then
+    if [[ -d $CHECKOUT_PATH ]]; then
+        if [[ "$(pwd)" == "$CHECKOUT_PATH" ]]; then
             cd $GIT_ROOT
         fi
         git -C $GIT_ROOT worktree remove $CHECKOUT_PATH || {
