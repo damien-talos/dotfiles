@@ -8,15 +8,9 @@ CMD_PWD=$(pwd)
 CMD="$0"
 CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
 RED='\033[01;31m'
+GRAY='\033[0;30m'
 STRIKETHROUGH='\033[9m'
 RESET='\033[00m'
-
-ansi() { echo -en "\033[${1}m${*:2}\033[0m"; }
-bold() { ansi 1 "$@"; }
-italic() { ansi 3 "$@"; }
-underline() { ansi 4 "$@"; }
-strikethrough() { ansi 9 "$@"; }
-red() { ansi 31 "$@"; }
 
 [ -n "$VERBOSE" ] || VERBOSE=0
 [ -n "$DEBUG" ] || DEBUG=0
@@ -66,11 +60,10 @@ git reflog |
     awk '{ print "@{-"++count"}" "\t" $3}' |
     if [ "$SHOW_ALL" -eq "0" ]; then awk ' !x[$2]++'; else cat; fi |
     (while read -r line; do
-        if git rev-parse --verify "$(echo "${line}" | awk '{ print $2 }')" &>/dev/null; then
+        if git rev-parse --verify "refs/heads/$(echo "${line}" | awk '{ print $2 }')" &>/dev/null; then
             echo -e "$line"
         else
-            echo -e "${RED}${STRIKETHROUGH}${line}${RESET}"
-            # eval $(echo $line | awk '{ print "echo -e " $1 "\"\\t\"$(bold $(red $(strikethrough " $2 ")))" }')
+            echo -e "${GRAY}${STRIKETHROUGH}${line}${RESET}"
         fi
     done) |
     if [ "$MAX_REFS" -eq "0" ]; then cat; else head -n $MAX_REFS; fi
