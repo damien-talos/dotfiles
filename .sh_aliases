@@ -13,7 +13,7 @@ current_shell=$(ps -o comm= $$)
 if [[ "${current_shell}" =~ bash ]]; then
     alias resource='source ~/.bashrc'
     alias edrc='$EDITOR ~/.bashrc'
-    alias ls='lsd'
+    if [[ ! -z "$(which lsd)" ]]; then alias ls='lsd'; fi
     alias lspath="which \$(compgen -A function -abck) | sort -u"
 elif [[ "${current_shell}" =~ zsh ]]; then
     alias resource='source ~/.zshenv && source ~/.zshrc'
