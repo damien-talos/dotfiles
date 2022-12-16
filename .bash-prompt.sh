@@ -133,7 +133,7 @@ set_prompt() {
     PS1+="$PromptBrownYellow\w"        # current working directory
 
     PS1+="$PromptCyan"                                            # change color to cyan
-    GIT_PS1=$([ "$(type -t __git_ps1)" == function ] && __gitps1) # bash function
+    GIT_PS1=$([ "$(type -t __git_ps1)" == function ] && __git_ps1) # bash function
     PS1="$PS1$GIT_PS1"
 
     PS1="$PS1"'\[\033[0m\]' # change color
