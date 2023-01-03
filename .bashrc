@@ -8,7 +8,7 @@
 
 shopt -s extglob globstar
 
-PATH=~/.yarn/bin:~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:$PATH
+PATH=~/.yarn/bin:~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:~/workspace/experiments/depot_tools:$PATH
 PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
 export PATH
 export EDITOR=code
@@ -91,6 +91,10 @@ source_or_err "/etc/profile.d/rvm.sh" # This loads rvm
 export NVM_DIR="$HOME/.nvm"
 source_or_err "$NVM_DIR/nvm.sh"          # This loads nvm
 source_or_err "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+
+# Google cloud
+source_or_err /snap/google-cloud-cli/current/path.bash.inc
+source_or_err /snap/google-cloud-cli/current/completion.bash.inc
 
 ### LOAD AVA ENVIRONMENT VARS
 source_or_err "/home/damien/workspace/talos/env/ava-vars.sh"
