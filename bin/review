@@ -104,6 +104,7 @@ set -- "${POSITIONAL[@]}"
 if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     if [[ "$1" =~ ^[0-9]+$ ]]; then
         PULL_REQUEST_ID="${PULL_REQUEST_ID:-$1}"
+        shift
         CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/pr${PULL_REQUEST_ID}}"
     else
         BRANCH_NAME="${BRANCH_NAME:-$1}"
@@ -112,22 +113,10 @@ if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     fi
 fi
 
-GIT_ROOT=$(readlink -f "${GIT_ROOT}")
-if [[ $CREATE_BRANCH == 1 ]]; then
-    source="${1:-origin/HEAD}"
-    user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\1/')
-    NEW_BRANCH_NAME="${user}/${BRANCH_NAME/^${user}/}"
-    git sync
-    git branch "${NEW_BRANCH_NAME}" "${source}"
-    if [ $? -ne 0 ]; then
-        die "Error creating new branch ${NEW_BRANCH_NAME}" 1
-    fi
-    BRANCH_NAME="${NEW_BRANCH_NAME}"
-fi
-
-if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
-    dbg "BRANCH_NAME not set, evaluating based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
-    BRANCH_NAME=$(curl -s \
+GITHUB_BRANCH_NAME=""
+if [ -n "$PULL_REQUEST_ID" ]; then
+    dbg "Evaluating remote branch name based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
+    GITHUB_BRANCH_NAME=$(curl -s \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/talostrading/Ava-UI/pulls/$PULL_REQUEST_ID |
@@ -135,11 +124,45 @@ if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
     if [ $? -ne 0 ]; then
         die "Error retrieving branch name from github" 1
     fi
+    dbg "Remote branch name is ${GITHUB_BRANCH_NAME}"
 fi
 
-if [ -n "$PULL_REQUEST_ID" ]; then
+GIT_ROOT=$(readlink -f "${GIT_ROOT}")
+if [[ $CREATE_BRANCH == 1 ]]; then
+    source="${1:-origin/HEAD}"
+    user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\1/')
+    NEW_BRANCH_NAME="${user}/${BRANCH_NAME/^${user}/}"
+    git -C "${GIT_ROOT}" sync
+    git -C "${GIT_ROOT}" branch "${NEW_BRANCH_NAME}" "${source}"
+    if [ $? -ne 0 ]; then
+        die "Error creating new branch ${NEW_BRANCH_NAME}" 1
+    fi
+    BRANCH_NAME="${NEW_BRANCH_NAME}"
+fi
+
+GITHUB_API=$(git -C "${GIT_ROOT}" config --get "remote.origin.url" | sed -e 's#https://github.com/\(.*\)\.git#https://api.github.com/repos/\1#')
+if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
+    dbg "BRANCH_NAME not set, evaluating based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
+    BRANCH_NAME=$(curl -s \
+        -H "Authorization: token $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        $GITHUB_API/pulls/$PULL_REQUEST_ID |
+        jq -r .head.ref)
+    if [ $? -ne 0 ]; then
+        die "Error retrieving branch name from github" 1
+    fi
+fi
+
+# Check to see if the branch is already checked out somewhere, if so, we'll re-use that checkout path
+CURRENT_BRANCH_CHECKOUT_PATH=$(git -C "${GIT_ROOT}" worktree list --porcelain | grep -B2 "branch refs/heads/$BRANCH_NAME" | head -n 1 | sed -e 's/worktree //')
+if [ -n "$CURRENT_BRANCH_CHECKOUT_PATH" ]; then
+    dbg "Already checked out at $CURRENT_BRANCH_CHECKOUT_PATH"
+    CHECKOUT_PATH="$CURRENT_BRANCH_CHECKOUT_PATH"
+elif [ -n "$PULL_REQUEST_ID" ]; then
+    dbg "Checking out to PR path"
     CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${PULL_REQUEST_ID}}"
 elif [ -n "$BRANCH_NAME" ]; then
+    dbg "Checking out to branch path"
     CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT${BRANCH_NAME}}"
 fi
 
@@ -152,7 +175,7 @@ if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     die "Either BRANCH_NAME or PULL_REQUEST_ID must be set"
 fi
 
-if [ -d "${CHECKOUT_PATH}" ] && [ -d "${CHECKOUT_PATH}/.git" ]; then
+if [ -d "${CHECKOUT_PATH}" ] && [ -e "${CHECKOUT_PATH}/.git" ]; then
     dbg "${CHECKOUT_PATH} exists"
     cd "${CHECKOUT_PATH}" || exit
 
