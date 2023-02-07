@@ -13,7 +13,7 @@ RESET='\033[00m'
 # Show help function to be used below
 clear_show_help() {
     awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
-    echo "$CMD clears the screen or a given file(s)"
+    echo "$CMD clears the screen or the given file(s)"
     echo "USAGE: $(basename "$CMD") [arguments]"
     echo "ARGS:"
     MSG=$(awk '/# BEGIN_KNOWN_ALIASES/,/# END_KNOWN_ALIASES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -n '/^[[:alpha:]]+\\)/p') # | awk '/^\w/ {printf "  %s\n", $1}')
@@ -31,12 +31,13 @@ clear() {
         case "$1" in
         # BEGIN_KNOWN_ALIASES
         dev.local)
-            if [[ -d "~/workspace/talos/ava/logs" ]]; then clear /c/dev/bfx/Logs/Dev.Barracuda/*; fi
+            if [[ -d "$HOME/workspace/talos/ava/logs" ]]; then clear $HOME/workspace/talos/Ava/logs/*.*; fi
             ;;
         # END_KNOWN_ALIASES
         *)
-            echo "Unknown clear target $1 does not exist"
+            echo "Unknown ${CMD} target $1 does not exist"
             clear_show_help
+            exit 1
             ;;
         esac
     else

@@ -1,3 +1,15 @@
+#!/bin/bash
+# --------------------------------------------- #
+# Fast async removal of a directory             #
+# --------------------------------------------- #
+
+# Get command info
+CMD_PWD=$(pwd)
+CMD="$0"
+# CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
+RED='\033[01;31m'
+RESET='\033[00m'
+
 # asynchronously remove a directory, much faster than a synchronous remove
 # works by first moving the folders to delete into a temporary dir (which is a fast operation),
 # then deleting that temporary dir in a background task
@@ -51,3 +63,9 @@ rmdir() {
     fi
     return $returnCode
 }
+
+
+if [[ "$0" == "$BASH_SOURCE" ]]; then
+    # Script was run as a command
+    rmdir $*
+fi
