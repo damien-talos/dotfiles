@@ -9,6 +9,8 @@
     cp = cherry-pick -x
     ### Debug git aliases - e.g. '\033[2m\033[3mgit debug pushup\033[0m'
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+    ### Edit the global gitaliases file
+    edalias = "!f() { git config -e -f $( git config --show-origin alias.edalias | sed -e 's/file://' -e 's/[[:space:]]\\+.*//' ) ; }; f"
     ### Edit the local .git/config file
     edrc = config -e
     ### Fix the previous commit, amend, but keep the same message etc.
@@ -36,6 +38,19 @@
     ### Fetch everything from origin (synchronize with origin)
     sync = fetch -p -P --all --tags
     up = pull
+
+    ### Show changes (and diff) where the search string was added / removed (\033[2m\033[3mgit log -p -S\033[0m)
+    log-pickaxe-s = "!f() { GREPDIFF_REGEX=\"$1\" git -c diff.external=pickaxe-diff log -p --ext-diff -S \"$@\"; }; f"
+    ### Show changes (and diff) where the search string occurs in added / removed lines (\033[2m\033[3mgit log -p -G\033[0m)
+    log-pickaxe-g = "!f() { GREPDIFF_REGEX=\"$1\" git -c diff.external=pickaxe-diff log -p --ext-diff -G \"$@\"; }; f"
+    ### git show -S
+    show-pickaxe-s = "!f() { GREPDIFF_REGEX=\"$1\" git -c diff.external=pickaxe-diff show -p --ext-diff -S \"$@\"; }; f"
+    ### git show -G
+    show-pickaxe-g = "!f() { GREPDIFF_REGEX=\"$1\" git -c diff.external=pickaxe-diff show -p --ext-diff -G \"$@\"; }; f"
+    ### git diff -S
+    diff-pickaxe-s = "!f() { GREPDIFF_REGEX=\"$1\" git -c diff.external=pickaxe-diff diff -p -S \"$@\"; }; f"
+    ### git diff -G
+    diff-pickaxe-g = "!f() { GREPDIFF_REGEX=\"$1\" git -c diff.external=pickaxe-diff diff -p -G \"$@\"; }; f"
 
     # Inactive aliases ...
 
