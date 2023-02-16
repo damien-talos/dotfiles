@@ -5,6 +5,8 @@
     alias-text = !git config --get-regexp '^alias\\.' | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
     ### List all local branches where the upstream no longer exists - use to cleanup by e.g. '\033[2m\033[3mgit cleanup-gone | xargs git branch -d\033[0m'
     cleanup-gone = !git branch -a --format='%(refname:short) %(upstream:track)' | grep '\\[gone\\]' | awk '{print $1}'
+    ### Remove all PR worktrees (from reviews) that are merged
+    cleanup-pr-trees = "git cleanup-gone | xargs git branch -d 2>&1 | grep \"checked\" | grep \"avatrees/pr\" | sed -e \"s#.*'\\(/home/damien/workspace/talos/avatrees/.*\\)'#\\1#\" | xargs -i bash -c \"echo {} && git worktree remove {}\""
     ### Cherry-pick changes, and append the original commit hash to the end of the commit message
     cp = cherry-pick -x
     ### Debug git aliases - e.g. '\033[2m\033[3mgit debug pushup\033[0m'
