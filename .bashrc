@@ -16,6 +16,8 @@ export FZF_DEFAULT_COMMAND='fd'
 export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."
 GITHUB_TOKEN=$(cat ~/.github_token)
 export GITHUB_TOKEN
+CIRCLECI_TOKEN=$(cat ~/.circleci_token)
+export CIRCLECI_TOKEN
 
 # Escape code definitions
 # BLUE='\033[01;34m'
@@ -92,14 +94,17 @@ export NVM_DIR="$HOME/.nvm"
 source_or_err "$NVM_DIR/nvm.sh"          # This loads nvm
 source_or_err "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
-# Google cloud
-source_or_err /snap/google-cloud-cli/current/path.bash.inc
-source_or_err /snap/google-cloud-cli/current/completion.bash.inc
-
 ### LOAD AVA ENVIRONMENT VARS
 source_or_err "/home/damien/workspace/talos/env/ava-vars.sh"
 ### END LOAD AVA ENVIRONMENT VARS
 
+# Google cloud
+source_or_err /snap/google-cloud-cli/current/path.bash.inc
+source_or_err /snap/google-cloud-cli/current/completion.bash.inc
+
 # [ -f /home/damien/workspace/shellcheck-repl/shellcheck-repl.bash ] && source "/home/damien/workspace/shellcheck-repl/shellcheck-repl.bash"
 
 # for d in ~/workspace/talos/Ava-UI/.git/worktrees/*; do if [ ! -f "$(cat $d/gitdir)" ]; then TARGET=$(cat "$d/gitdir"); mkdir -p $(dirname "$TARGET") && echo "gitdir: $d" > $TARGET; fi; done
+
+# PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
+export PATH
