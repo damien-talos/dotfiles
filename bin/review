@@ -99,6 +99,8 @@ if [[ $VERBOSE -gt 2 ]]; then
     set -x
 fi
 
+set -e
+
 set -- "${POSITIONAL[@]}"
 
 if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
@@ -183,17 +185,24 @@ if [ -d "${CHECKOUT_PATH}" ] && [ -e "${CHECKOUT_PATH}/.git" ]; then
     dbg "Current branch = ${CURRENT_BRANCH}"
 
     if [ "$CURRENT_BRANCH" != "$BRANCH_NAME" ]; then
+        vrb "Sync repo"
         git -C "${GIT_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
+        vrb "Switch branch"
         git switch $BRANCH_NAME || die "Error switching from $CURRENT_BRANCH to $BRANCH_NAME" $?
     fi
-    git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null && (git pull --ff-only || die "Error pulling latest changes for $BRANCH_NAME" $?)
+    vrb "Pull latest changes for branch"
+    git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>&1 >/dev/null && (git pull || die "Error pulling latest changes for $BRANCH_NAME" $?)
 else
+    vrb "Make parent directory"
     mkdir -p "${CHECKOUT_PATH}"/..
+    vrb "Sync repo"
     git -C "${GIT_ROOT}" fetch -p -P --all --tags || die "Error syncing repo" $?
+    vrb "Add worktree"
     git -C "${GIT_ROOT}" worktree add "${CHECKOUT_PATH}" $BRANCH_NAME || die "Error adding worktree for PR$PULL_REQUEST_ID ($BRANCH_NAME)" $?
 fi
 
 if [[ $OPEN_EDITOR == 1 ]]; then
+    vrb "Open code"
     if [ -f "${CHECKOUT_PATH}/ava-ui.code-workspace" ]; then
         code "${CHECKOUT_PATH}/ava-ui.code-workspace"
     else
