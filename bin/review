@@ -156,7 +156,7 @@ if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
 fi
 
 # Check to see if the branch is already checked out somewhere, if so, we'll re-use that checkout path
-CURRENT_BRANCH_CHECKOUT_PATH=$(git -C "${GIT_ROOT}" worktree list --porcelain | grep -B2 "branch refs/heads/$BRANCH_NAME" | head -n 1 | sed -e 's/worktree //')
+CURRENT_BRANCH_CHECKOUT_PATH=$( {git -C "${GIT_ROOT}" worktree list --porcelain | grep -B2 "branch refs/heads/$BRANCH_NAME" | head -n 1 | sed -e 's/worktree //' } || echo "")
 if [ -n "$CURRENT_BRANCH_CHECKOUT_PATH" ]; then
     dbg "Already checked out at $CURRENT_BRANCH_CHECKOUT_PATH"
     CHECKOUT_PATH="$CURRENT_BRANCH_CHECKOUT_PATH"
