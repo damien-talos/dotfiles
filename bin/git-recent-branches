@@ -63,7 +63,9 @@ git reflog |
         if git rev-parse --verify "refs/heads/$(echo "${line}" | awk '{ print $2 }')" &>/dev/null; then
             echo -e "$line"
         else
-            echo -e "${GRAY}${STRIKETHROUGH}${line}${RESET}"
+            # branch is deleted
+            echo -e "${RED}${STRIKETHROUGH}${line}${RESET}"
+            # eval $(echo $line | awk '{ print "echo -e " $1 "\"\\t\"$(bold $(red $(strikethrough " $2 ")))" }')
         fi
     done) |
     if [ "$MAX_REFS" -eq "0" ]; then cat; else head -n $MAX_REFS; fi

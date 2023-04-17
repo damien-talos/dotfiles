@@ -18,6 +18,11 @@ if [[ "${current_shell}" =~ bash ]]; then
 elif [[ "${current_shell}" =~ zsh ]]; then
     alias resource='source ~/.zshenv && source ~/.zshrc'
     alias edrc='$EDITOR ~/.zshrc'
+fi
+
+if command -v lsd >/dev/null 2>&1; then
+    alias ls='lsd'
+else
     alias ls="ls -G"
 fi
 

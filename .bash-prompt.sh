@@ -8,9 +8,22 @@
 # exit code and timings when none exists yet
 FIRST_PROMPT=${FIRST_PROMPT:-1}
 
-function timer_now {
-    date +%s%N
-}
+if [[ "$(date +%s%N)" != *N ]]; then
+    function timer_now {
+        # Regular unix date command supports %N (milliseconds)
+        date +%s%N
+    }
+elif command -v gdate >/dev/null 2>&1; then
+    function timer_now {
+        # On macs, we may be able to use gdate
+        gdate +%s%N
+    }
+else
+    function timer_now {
+        # If we can't fallback to gdate, we'll just fake it - milliseconds will always be zero
+        echo $(($(date +'%s * 1000 + %-N / 1000000')))
+    }
+fi
 # Executed before *every* command
 # e.g. echo 1; sleep 2; echo 3
 # will execute this 3 times; see `prompt_command`

@@ -4,7 +4,9 @@
     ### View plain text definitions of git aliases
     alias-text = !git config --get-regexp '^alias\\.' | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
     ### List all local branches where the upstream no longer exists - use to cleanup by e.g. '\033[2m\033[3mgit cleanup-gone | xargs git branch -d\033[0m'
-    cleanup-gone = !git branch -a --format='%(refname:short) %(upstream:track)' | grep '\\[gone\\]' | awk '{print $1}'
+    cleanup-gone = !git branch -a --format='%(refname:short) %(upstream:track)' \
+        | grep '\\[gone\\]' \
+        | awk '{print $1}'
     ### Remove all PR worktrees (from reviews) that are merged
     cleanup-pr-trees = "git cleanup-gone | xargs git branch -d 2>&1 | grep \"checked\" | grep \"avatrees/pr\" | sed -e \"s#.*'\\(/home/damien/workspace/talos/avatrees/.*\\)'#\\1#\" | xargs -i bash -c \"echo {} && git worktree remove {}\""
     ### Cherry-pick changes, and append the original commit hash to the end of the commit message
@@ -24,7 +26,15 @@
     ### List worktrees
     lsw = worktree list
     ### Create a new git branch, prefixed by `${user}/`, e.g. to create the branch "damien/sc-12345-hotfix" from origin/release-v3.14.15 - '\033[2m\033[3mgit newbranch sc-12345-hotfix origin/release-v3.14.15\033[0m'
-    newbranch = "!f() { set -x; target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\\1/'); git sync; git switch --no-track -c \"${user}/${target#${user}/}\" \"${source}\" \"$@\"; git config --add \"branch.${user}/${target#${user}/}.forked-from\" \"${source}\"; }; f"
+    newbranch = "!f() { \
+            target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; \
+            source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; \
+            user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\\1/'); \
+            git sync; \
+            git switch --no-track -c \"${user}/${target#${user}/}\" \"${source}\" \"$@\"; \
+            git config --add \"branch.${user}/${target#${user}/}.forked-from\" \"${source}\"; \
+        }; \
+        f "
     ### Force push the current branch (with-lease for safety)
     pushf = push --force-with-lease
     ### Push the current branch to origin, with the same name
@@ -34,7 +44,13 @@
     st = status
     stash = stash -u
     ### Grep through all stashes - e.g. '\033[2m\033[3mgit stashgrep "fix"\033[0m'
-    stashgrep = "!f() { for i in $(git stash list --format=\"%gd\") ; do git stash show -p $i | grep --color=always -C 4 -H --label=\"$i\" \"$@\"; done ; }; f"
+    stashgrep = "!f() { \
+            for i in $(git stash list --format=\"%gd\") ; do \
+                git stash show -p $i \
+                | grep --color=always -C 4 -H --label=\"$i\" \"$@\"; \
+            done ; \
+        }; \
+        f"
     ### Stash everything but keep all changes still
     stashk = "!f() { git stash \"$@\" && git stash apply; }; f"
     ### Fetch everything from origin (synchronize with origin)

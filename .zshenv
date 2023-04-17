@@ -19,6 +19,7 @@ source_or_err() {
 }
 
 source_or_err ~/.sentry_token
+source_or_err ~/.shortcut_token
 
 ## LOAD AVA ENVIRONMENT VARS
 source_or_err /Users/damien.schoof/workspace/talos/env/ava-vars.sh
@@ -28,3 +29,4 @@ export NVM_DIR="$HOME/.nvm"
 source_or_err "$NVM_DIR/nvm.sh" # This loads nvm
 
 PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
+. "$HOME/.cargo/env"

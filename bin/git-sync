@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -exo pipefail
+set -eo pipefail
 
 # Ubuntu has some git-sync command already on disk,
 # but it doesn't do what I want.  Aliases are lower

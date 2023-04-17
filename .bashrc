@@ -6,7 +6,9 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-shopt -s extglob globstar
+shopt -s extglob
+# Enable ** globs (if available)
+shopt globstar >/dev/null 2>&1 && shopt -s globstar
 
 PATH=~/.yarn/bin:~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:~/workspace/experiments/depot_tools:$PATH
 PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
@@ -24,6 +26,7 @@ export CIRCLECI_TOKEN
 # CYAN='\033[01;36m'
 # WHITE='\033[01;37m'
 RED='\033[01;31m'
+GRAY='\033[01;30;1m'
 # GREEN='\033[01;32m'
 # STRIKETRHOUGH='\033[9m'
 RESET='\033[00m'
@@ -66,6 +69,14 @@ source_or_err() {
     echo -e "${RED}Unable to find and source $1${RESET}"
   fi
 }
+source_or_ignore() {
+  if [ -f "$1" ]; then
+    # shellcheck disable=1090
+    . "$1"
+  else
+    echo -e "${GRAY}Unable to find and source $1${RESET}"
+  fi
+}
 
 # Load my fancy prompt
 source_or_err "${HOME}/.bash-prompt.sh"
@@ -87,15 +98,15 @@ fi
 # source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
 # bind -x '"\t": fzf_bash_completion'
 
-source_or_err "$HOME/.cargo/env"
-source_or_err "/etc/profile.d/rvm.sh" # This loads rvm
+source_or_ignore "$HOME/.cargo/env"
+source_or_ignore "/etc/profile.d/rvm.sh" # This loads rvm
 
 export NVM_DIR="$HOME/.nvm"
-source_or_err "$NVM_DIR/nvm.sh"          # This loads nvm
-source_or_err "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+source_or_ignore "$NVM_DIR/nvm.sh"          # This loads nvm
+source_or_ignore "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 ### LOAD AVA ENVIRONMENT VARS
-source_or_err "/home/damien/workspace/talos/env/ava-vars.sh"
+source_or_ignore "/home/damien/workspace/talos/env/ava-vars.sh"
 ### END LOAD AVA ENVIRONMENT VARS
 
 # Google cloud
