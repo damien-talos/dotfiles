@@ -15,8 +15,8 @@ clear_show_help() {
     awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
     echo "$CMD clears the screen or the given file(s)"
     echo "USAGE: $(basename "$CMD") [arguments]"
-    echo "ARGS:"
-    MSG=$(awk '/# BEGIN_KNOWN_ALIASES/,/# END_KNOWN_ALIASES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -n '/^[[:alpha:]]+\\)/p') # | awk '/^\w/ {printf "  %s\n", $1}')
+    echo "KNOWN ALIASES:"
+    MSG=$(awk '/# BEGIN_KNOWN_ALIASES/,/# END_KNOWN_ALIASES/' "$CMD" | sed -e 's/^[[:space:]]*//; s/|/\t/;' | sed -n -e '/^\([[:alpha:].[:space:]|]\{1,\}\)).*/ {s// - \1/; p;}')
     echo -e "$MSG"
     # EMSG=$(eval "echo \"$MSG\"")
     echo "$EMSG"
