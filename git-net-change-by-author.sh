@@ -204,7 +204,7 @@ if [[ $CALC_TOTAL_OWNERSHIP == 1 ]]; then
     echo "Total lines ownership across entire repo"
     (
         printf "Author|Lines owned|Percentage lines owned\n"
-        git ls-files |
+        LC_ALL=C git ls-files |
             sed -E '/.*\.(svg|json)$/d; /packages\/(charting_library|tradingview|datafeeds)/d; /^out\//d; /apps\/\w+\/public/d; /packages\/kyoko\/src\/types\/types.ts/d; /\/build\//d; /packages\/shared\/dist\//d;' |
             xargs -I{} git blame --line-porcelain {} |
             sed -n '/^author /{ h; }; /^author-mail /{ x; G; s/\n/ /g;s/author\(-mail\)\? //g; p; }' |
