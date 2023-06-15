@@ -41,23 +41,22 @@ function terminal_bg_color() {
 
 #Creates aliases for connecting to the instances
 function regen_aliases() {
-    local red="printf %b '\\\\033]11;#440000\\\\a'"
+    export red='printf %b "\033]11;#440000\a"'
     # local orange="printf %b '\033]11;#cc7000\\a\\'"
     # local green="printf %b '\033]11;#155600\\a\\'"
-    local back="printf %b '\\\\033]11;$(terminal_bg_color)\\\\a'"
+    export back='printf %b "\033]11;${previous_bg}\a"'
 
-    regen_instances
+    # regen_instances
 
     echo "Regenerating prod aliases to "${BIN_DIR}/prod-aliases.sh
     echo "#!/bin/bash" >"${BIN_DIR}/prod-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/prod-aliases.sh"
-
-    cat "${BIN_DIR}/prod-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/prod-aliases.sh"
+    awk '{printf "%s () { previous_bg=$(terminal_bg_color); %s && local_tunnel %s 5432 \"$@\"; %s; }\n", $1, ENVIRON["red"], $1, ENVIRON["back"] } ' "${BIN_DIR}/prod-instances.tsv" >>"${BIN_DIR}/prod-aliases.sh"
 
     echo "Regenerating uat aliases to "${BIN_DIR}/uat-aliases.sh
     echo "#!/bin/bash" >"${BIN_DIR}/uat-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/uat-aliases.sh"
-    cat "${BIN_DIR}/uat-instances.tsv" | awk -v RED="${red}" -v BACK="${back}" '{printf "alias %s=\"%s && local_tunnel %s 5432; %s\"\n", $1, RED, $1, BACK }' >>"${BIN_DIR}/uat-aliases.sh"
+    awk '{printf "%s () { previous_bg=$(terminal_bg_color); %s && local_tunnel %s 5432 \"$@\"; %s; }\n", $1, ENVIRON["red"], $1, ENVIRON["back"] } ' "${BIN_DIR}/uat-instances.tsv" >>"${BIN_DIR}/uat-aliases.sh"
 
     source "${BIN_DIR}/prod-aliases.sh"
     source "${BIN_DIR}/uat-aliases.sh"
