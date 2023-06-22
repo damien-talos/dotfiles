@@ -39,10 +39,9 @@
 	tool = VSCodeMerge
 [mergetool]
 	keepBackup = false
-# [mergetool "TortoiseGitMerge"]
-# 	cmd = \"C:\\Program Files\\TortoiseGit\\bin\\TortoiseGitMerge.exe\" -base:\"$BASE\" -mine:\"$LOCAL\" -theirs:\"$REMOTE\" -merged:\"$MERGED\"
+	tool = "VSCodeMerge"
 [mergetool "VSCodeMerge"]
-	cmd = code --wait "${MERGED}"
+	cmd = code --wait --merge "${MERGED}"
 [pretty]
 	branchcompare=- [ ] %C(bold cyan)%h -- %C(bold green)@%an -- %C(bold red)%ad %Creset(%C(bold yellow)%N%-%Creset)%n      %s%-
 	onelinelog=%C(bold yellow)%N%- %Creset%ad%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
@@ -54,8 +53,6 @@
 	autoSquash = true
 	autoStash = true
 	missingCommitsCheck = error
-# [remote "origin"]
-# 	push = ^refs/heads/dura/*
 [rerere]
 	autoUpdate = true
 	enabled = true
