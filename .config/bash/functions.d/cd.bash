@@ -54,7 +54,7 @@ function _cd {
     # use `_cd -n` to go n directories back in history
     elif [[ "$1" =~ ^-[0-9]+$ ]]; then
         for i in $(seq 1 $((${1/-/} - 1))); do
-            popd -n >/dev/null
+            dirs -1 2>/dev/null && popd -n >/dev/null
         done
         popd >/dev/null || return
     # use `_cd -- <path>` if your path begins with a dash

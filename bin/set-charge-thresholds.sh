@@ -75,11 +75,10 @@ if [ $VERBOSE -gt 0 ]; then
     show_variables
 fi
 
-if [[ $FULL_CHARGE == 1 ]]; then
-    sudo tlp fullcharge
-fi
 if [[ $ONCE == 1 ]]; then
     RESTORE_THRESHOLDS_ON_BAT=1 sudo tlp fullcharge
+elif [[ $FULL_CHARGE == 1 ]]; then
+    sudo tlp fullcharge
 fi
 
 exit 0
