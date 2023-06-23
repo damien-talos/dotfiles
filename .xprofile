@@ -1,0 +1,5 @@
+#!/bin/sh
+# 0 ✓ (6.1ms) 08:56:41 @ ~/workspace/talos/avatrees/UI-2657-CSRF-protection (damien/UI-2841-update-dependencies)
+xrandr --newmode "2560x1440_50.00" 256.25 2560 2736 3008 3456 1440 1443 1448 1484 -hsync +vsync
+# 0 ✓ (9.7ms) 08:56:56 @ ~/workspace/talos/avatrees/UI-2657-CSRF-protection (damien/UI-2841-update-dependencies)
+xrandr --addmode DisplayPort-2 "2560x1440_50.00"

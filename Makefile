@@ -13,10 +13,12 @@ shellcheck: build/shellcheck.target
 build/shellcheck.target: $(BASH_SCRIPTS)
 	shellcheck $? && touch $@
 
-install_config_files: git_config bash_config zsh_config
 git_config: ~/.gitconfig ~/.gitaliases
 bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases ~/.talos_aliases
 zsh_config: ~/.zshrc ~/.zshenv ~/.zsh_aliases ~/.talos_aliases
+x_config: ~/.xprofile
+
+install_config_files: git_config bash_config zsh_config x_config
 
 install_bins: $(bins)
 install_functions: $(functions)

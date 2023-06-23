@@ -6,11 +6,8 @@
 set -eo pipefail
 
 # Get command info
-CMD_PWD=$(pwd)
 CMD="$0"
-CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
 RED='\033[01;31m'
-STRIKETHROUGH='\033[9m'
 RESET='\033[00m'
 
 ansi() { echo -en "\033[${1}m${*:2}\033[0m"; }
@@ -26,8 +23,8 @@ red() { ansi 31 "$@"; }
 
 out() { echo -e "$(date +%Y-%m-%dT%H:%M:%SZ): $*"; }
 err() { out "$*" 1>&2; }
-vrb() { if [ $VERBOSE -gt 1 ]; then out "$@"; fi; }
-dbg() { if [ $VERBOSE -gt 0 ]; then err "$@"; fi; }
+vrb() { if [ "$VERBOSE" -gt 1 ]; then out "$@"; fi; }
+dbg() { if [ "$VERBOSE" -gt 0 ]; then err "$@"; fi; }
 die() { err "EXIT: ${RED}$1${RESET}" && [ "$2" ] && [ "$2" -ge 0 ] && exit "$2" || exit 1; }
 
 # Show help function to be used below
@@ -49,8 +46,6 @@ show_variables() {
     eval "$MSG"
 }
 
-POSITIONAL=()
-
 NARGS=-1
 while [ "$#" -ne "$NARGS" ]; do
     NARGS=$#
@@ -61,7 +56,12 @@ while [ "$#" -ne "$NARGS" ]; do
         exit 0
         ;;
     -vv | --verbose) # Enable verbose messages (DEFAULT: $VERBOSE)
-        VERBOSE=$((VERBOSE + 2)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
+        VERBOSE=$((VERBOSE + 2)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+        if [[ $VERBOSE -gt 2 ]]; then
+            # For super verbose logging, enable the tracing flag as well
+            set -x
+        fi
+        ;;
     -v | --debug) # Enable verbose messages (DEFAULT: $VERBOSE)
         VERBOSE=$((VERBOSE + 1)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
     esac
@@ -101,46 +101,41 @@ get_lid_state() {
 }
 
 BUILT_IN=$(get_port 00ffffffffffff0006af3d5700000000)
-LENOVO_27=$(get_port 00ffffffffffff0030aeaf6147424b32)
-LENOVO_32=$(get_port 00ffffffffffff0030aef26100000000)
-ASUS_24=$(get_port 00ffffffffffff0006b3c12401010101)
+LENOVO_27H_10=$(get_port 00ffffffffffff0030aeaf6147424b32)
+LENOVO_T32_20=$(get_port 00ffffffffffff0030aef26100000000)
+LENOVO_P32_20=$(get_port 00ffffffffffff0030aea26200000000)
 
 if [ -n "${BUILT_IN}" ]; then
     vrb "BUILT IN: ${BUILT_IN}"
     LID_CLOSED=$(get_lid_state)
     case "${LID_CLOSED}" in
     open)
-        vrb "xrandr --output $BUILT_IN --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal"
-        xrandr --output $BUILT_IN --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal
+        xrandr --output "$BUILT_IN" --mode 1920x1080 --refresh 60.00 --pos 6400x1080 --rotate normal
         ;;
     *)
-        vrb "xrandr --output $BUILT_IN --off"
-        xrandr --output $BUILT_IN --off
+        xrandr --output "$BUILT_IN" --off
         ;;
     esac
 else
     err "${RED}Could not find monitor BUILT_IN${RESET}"
 fi
-if [ -n "${ASUS_24}" ]; then
-    vrb "ASUS 24: ${ASUS_24}"
-    vrb "xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x0 --rotate normal"
-    xrandr --output $ASUS_24 --mode 1920x1080 --refresh 60.00 --pos 6400x0 --rotate normal
+if [ -n "${LENOVO_27H_10}" ]; then
+    vrb "LENOVO P27h-10: ${LENOVO_27H_10}"
+    xrandr --output "$LENOVO_27H_10" --mode 2560x1440_50.00 --refresh 49.96 --pos 0x0 --rotate left
 else
-    err "${RED}Could not find monitor ASUS_24${RESET}"
+    err "${RED}Could not find monitor LENOVO_27H_10${RESET}"
 fi
-if [ -n "${LENOVO_27}" ]; then
-    vrb "LENOVO 27: ${LENOVO_27}"
-    vrb "xrandr --output $LENOVO_27 --mode 2560x1440 --refresh 60.00 --pos 0x720 --rotate normal"
-    xrandr --output $LENOVO_27 --mode 2560x1440 --refresh 60.00 --pos 0x720 --rotate normal
+if [ -n "${LENOVO_T32_20}" ]; then
+    vrb "LENOVO T32p-20: ${LENOVO_T32_20}"
+    xrandr --output "$LENOVO_T32_20" --primary --mode 3840x2160 --refresh 50.00 --pos 1440x212 --rotate normal
 else
-    err "${RED}Could not find monitor LENOVO_27${RESET}"
+    err "${RED}Could not find monitor LENOVO_T32_20${RESET}"
 fi
-if [ -n "${LENOVO_32}" ]; then
-    vrb "LENOVO 32: ${LENOVO_32}"
-    vrb "xrandr --output $LENOVO_32 --primary --mode 3840x2160 --refresh 60.00 --pos 2560x0 --rotate normal"
-    xrandr --output $LENOVO_32 --primary --mode 3840x2160 --refresh 60.00 --pos 2560x0 --rotate normal
+if [ -n "${LENOVO_P32_20}" ]; then
+    vrb "LENOVO P32p-20: ${LENOVO_P32_20}"
+    xrandr --output "$LENOVO_P32_20" --mode 3840x2160 --refresh 50.00 --pos 5280x212 --rotate normal
 else
-    err "${RED}Could not find monitor LENOVO_32${RESET}"
+    err "${RED}Could not find monitor LENOVO_P32_20${RESET}"
 fi
 
 # xrandr \
