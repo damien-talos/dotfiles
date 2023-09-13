@@ -34,7 +34,7 @@ alias sucode="sudo code --user-data-dir='/root/.config/Code/' --no-sandbox --dis
 alias clear="clear.sh"
 alias rmdir="rmdir.sh"
 
-alias dotedit="code ~/workspace/dotfiles/dotfiles.code-workspace"
+alias dotedit='code $(dirname $(realpath ~/.bashrc))/dotfiles.code-workspace'
 
 # shellcheck disable=2142
 alias current-paths='echo $PATH | awk -F : '"'"'BEGIN {OFS="\n"}; {$1=$1; print $0}'"'"
