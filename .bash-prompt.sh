@@ -142,10 +142,13 @@ set_prompt() {
         PS1+=" ($last_command_run_time) " # Time to execute last command
     fi
 
-    PS1+="$PromptRed\t$PromptReset @ " # current time (HH:MM:SS) when this prompt was shown
-    PS1+="$PromptBrownYellow\w"        # current working directory
+    PS1+="$PromptRed\t$PromptReset " # current time (HH:MM:SS) when this prompt was shown
+    if [[ -n "$SSH_CLIENT" ]]; then
+        PS1+="$PromptCyan\H$PromptReset "
+    fi
+    PS1+="@ $PromptBrownYellow\w" # current working directory
 
-    PS1+="$PromptCyan"                                            # change color to cyan
+    PS1+="$PromptCyan"                                             # change color to cyan
     GIT_PS1=$([ "$(type -t __git_ps1)" == function ] && __git_ps1) # bash function
     PS1="$PS1$GIT_PS1"
 
