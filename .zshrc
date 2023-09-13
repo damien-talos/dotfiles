@@ -140,9 +140,12 @@ function precmd() {
         PROMPT+=" ($last_command_run_time) " # Time to execute last command
     fi
 
-    PROMPT+="%f%F{red}%*%f @ " # current time (HH:MM:SS) when this prompt was shown
+    PROMPT+="%f%F{red}%*%f " # current time (HH:MM:SS) when this prompt was shown
+    if [[ -n "$SSH_CLIENT" ]]; then
+        PROMPT+="%F{cyan}%M%f "
+    fi
     # PROMPT+="$PromptBrownYellow\w"        # current working directory
-    PROMPT+="%F{yellow}%~%f" # current working directory
+    PROMPT+="@ %F{yellow}%~%f" # current working directory
 
     # PROMPT+="$PromptCyan" # change color to cyan
     # GIT_PROMP=$([ "$(type -t __git_ps1)" == function ] && __git_ps1) # bash function
@@ -162,3 +165,4 @@ zstyle ':vcs_info:git*' formats "%{$fg[blue]%}(%b)%{$reset_color%}%m%u%c%{$reset
 
 # PROMPT='%n@%m %1~ %#'
 # export PROMPT='%? %F{red}%*%f @ %F{yellow}%~%f %F{cyan}${vcs_info_msg_0_}%f'$'\n''λ '
+
