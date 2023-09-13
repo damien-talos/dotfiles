@@ -2,9 +2,17 @@
   "folders": [
     {
       "path": "."
+    },
+    {
+      "path": "../talos/dotfiles"
     }
   ],
-  "settings": {},
+  "settings": {
+    "[awk]": {
+      "editor.semanticHighlighting.enabled": true,
+      "editor.defaultFormatter": "beaglefoot.awk-ide-vscode"
+    }
+  },
   "launch": {
     "version": "0.2.0",
     "configurations": [

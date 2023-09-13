@@ -43,7 +43,8 @@ function terminal_bg_color() {
 function regen_aliases() {
     export red='printf %b "\033]11;#440000\a"'
     # local orange="printf %b '\033]11;#cc7000\\a\\'"
-    # local green="printf %b '\033]11;#155600\\a\\'"
+    export green='printf %b "\033]11;#155600\a"'
+    # shellcheck disable=SC2016
     export back='printf %b "\033]11;${previous_bg}\a"'
 
     regen_instances
@@ -56,7 +57,7 @@ function regen_aliases() {
     echo "Regenerating uat aliases to "${BIN_DIR}/uat-aliases.sh
     echo "#!/bin/bash" >"${BIN_DIR}/uat-aliases.sh"
     echo "#Generated on $(date)" >>"${BIN_DIR}/uat-aliases.sh"
-    awk '{printf "%s () { previous_bg=$(terminal_bg_color); %s && local_tunnel %s 5432 \"$@\"; %s; }\n", $1, ENVIRON["red"], $1, ENVIRON["back"] } ' "${BIN_DIR}/uat-instances.tsv" >>"${BIN_DIR}/uat-aliases.sh"
+    awk '{printf "%s () { previous_bg=$(terminal_bg_color); %s && local_tunnel %s 5432 \"$@\"; %s; }\n", $1, ENVIRON["green"], $1, ENVIRON["back"] } ' "${BIN_DIR}/uat-instances.tsv" >>"${BIN_DIR}/uat-aliases.sh"
 
     source "${BIN_DIR}/prod-aliases.sh"
     source "${BIN_DIR}/uat-aliases.sh"

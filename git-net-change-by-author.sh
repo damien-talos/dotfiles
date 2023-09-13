@@ -126,6 +126,11 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
+if [[ $CALC_NET_LINE_CHANGE == 0 && $CALC_TOTAL_OWNERSHIP == 0 ]]; then
+    show_help
+    exit 1
+fi
+
 # Enable errexit
 set -e
 
@@ -140,7 +145,7 @@ fi
 
 if [[ $CALC_NET_LINE_CHANGE == 1 ]]; then
     SED_SCRIPT_IGNORE_PATHS=$(
-        find . -maxdepth 1 -name '*ignore' | xargs sed -e 's/#.*$//g; /./!d; /^!/d; s/\./\\./g; s/\*\*/.*/g; s/\*/[^*]\+/g; s/\//\\\//g; s/.*/\/\0\/d;/g'
+        find . -maxdepth 1 -name '*ignore' -print0 | xargs -0 sed -e 's/#.*$//g; /./!d; /^!/d; s/\./\\./g; s/\*\*/.*/g; s/\*/[^*]\+/g; s/\//\\\//g; s/.*/\/\0\/d;/g'
         cat - <<'_EOF_'
 /^[ \t]*$/d;
 /^-\t-/d;
@@ -191,11 +196,13 @@ _EOF_
     echo "Net line change per author from $GIT_FROM to $GIT_TO"
     (
         printf "Author|Files modified|Added lines|Deleted lines|Net lines\n"
-        git log --oneline --no-merges --pretty=format:"%aN|<%aE>" --numstat "$GIT_FROM..$GIT_TO" |
+        stats=$(git log --oneline --no-merges --pretty=format:"%aN|<%aE>" --numstat "$GIT_FROM..$GIT_TO" |
             sed -E "$SED_SCRIPT_IGNORE_PATHS" |
             awk "$AWK_SCRIPT_1" |
             awk -F"|" "$AWK_SCRIPT_SUMMARIZE_STATS" |
-            sort -t "|" --key=5n
+            sort -t "|" --key=5n)
+        echo "$stats"
+        echo "$stats" | awk -F'|' '{ files = files+$2; added=added+$3; deleted=deleted+$4; net=net+$5; } END {printf("%s|%d|%d|%d|%d\n","Total",files,added,deleted,net)}'
     ) |
         column -t -s "|"
 fi

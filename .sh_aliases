@@ -12,7 +12,7 @@ fi
 current_shell=$(ps -o comm= $$)
 if [[ "${current_shell}" =~ bash ]]; then
     alias resource='source ~/.bashrc'
-    alias edrc='$EDITOR ~/.bashrc'
+    alias edrc='$EDITOR $(readlink -f ~/.bashrc)'
     if [[ ! -z "$(which lsd)" ]]; then alias ls='lsd'; fi
     alias lspath="which \$(compgen -A function -abck) | sort -u"
 elif [[ "${current_shell}" =~ zsh ]]; then
@@ -40,6 +40,8 @@ alias dotedit='code $(dirname $(realpath ~/.bashrc))/dotfiles.code-workspace'
 alias current-paths='echo $PATH | awk -F : '"'"'BEGIN {OFS="\n"}; {$1=$1; print $0}'"'"
 
 alias dirs='dirs -v'
+
+alias macbook='ssh -L 3001:localhost:3001 -L 3002:localhost:3002 -L 3003:localhost:3003 -L 8089:localhost:8089 ca-dschoof-02.local'
 
 # alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
 
