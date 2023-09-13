@@ -20,6 +20,8 @@ GITHUB_TOKEN=$(cat ~/.github_token)
 export GITHUB_TOKEN
 CIRCLECI_TOKEN=$(cat ~/.circleci_token)
 export CIRCLECI_TOKEN
+FIGMA_TOKEN=$(cat ~/.figma_token)
+export FIGMA_TOKEN
 
 # Escape code definitions
 # BLUE='\033[01;34m'
