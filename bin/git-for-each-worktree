@@ -1,0 +1,16 @@
+#!/bin/bash
+# Simple script to run a command in each worktree of the current git repo
+
+git worktree list --porcelain | grep worktree | sed -e 's/worktree //' | while IFS= read -r worktree; do
+    (
+        exec > >(
+            trap "" INT TERM
+            sed "s/^/${worktree//\//\\\/}: /"
+        )
+        exec 2> >(
+            trap "" INT TERM
+            sed "s/^/${worktree//\//\\\/}: /" >&2
+        )
+        cd "${worktree}" && eval "$*"
+    )
+done
