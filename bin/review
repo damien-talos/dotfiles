@@ -2,6 +2,7 @@
 # --------------------------------------------- #
 # Quickly / easily review a github pull request #
 # --------------------------------------------- #
+
 set -o pipefail
 
 # Get command info
@@ -20,7 +21,7 @@ RESET="\033[00m"
 [ -n "$BRANCH_NAME" ] || BRANCH_NAME=
 [ -n "$GIT_WORKTREE_ROOT" ] || GIT_WORKTREE_ROOT="${HOME}/workspace/talos/avatrees"
 [ -n "$CHECKOUT_PATH" ] || CHECKOUT_PATH=
-[ -n "$GIT_ROOT" ] || GIT_ROOT="${HOME}/workspace/talos/Ava-UI"
+[ -n "$GIT_ROOT" ] || GIT_ROOT=
 [ -n "$ECHO_CURRENT_DIR" ] || ECHO_CURRENT_DIR=0
 # END SCRIPT VARIABLES
 
@@ -84,6 +85,12 @@ while [ "$#" -ne "$NARGS" ]; do
         shift && GIT_ROOT="$1" && shift && vrb "#-INFO: GIT_ROOT=$GIT_ROOT" ;;
     -ecd | --echo-cd) # Echo the CWD before exit (to allow calling function to cd / source) (DEFAULT: $ECHO_CURRENT_DIR)
         shift && ECHO_CURRENT_DIR=1 && vrb "#-INFO: ECHO_CURRENT_DIR=$ECHO_CURRENT_DIR" ;;
+    -vv)
+        VERBOSE=$((VERBOSE + 2)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+        ;;
+    -vvv)
+        VERBOSE=$((VERBOSE + 3)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+        ;;
     *) # unknown option, save it in an array for later
         # if [ "${1:0:1}" = "-" ]; then
         #     new_args=$(echo "$1" | grep -o '[[:alnum:]]' | sed -E -e 's/^/-/')
@@ -118,39 +125,46 @@ fi
 GITHUB_BRANCH_NAME=""
 if [ -n "$PULL_REQUEST_ID" ]; then
     dbg "Evaluating remote branch name based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
-    GITHUB_BRANCH_NAME=$(curl -s \
+    if ! GITHUB_BRANCH_NAME=$(curl -f -s -S \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/talostrading/Ava-UI/pulls/$PULL_REQUEST_ID |
-        jq -r .head.ref)
-    if [ $? -ne 0 ]; then
+        jq -r .head.ref); then
         die "Error retrieving branch name from github" 1
     fi
     dbg "Remote branch name is ${GITHUB_BRANCH_NAME}"
 fi
 
+if [ -z "${GIT_ROOT}" ]; then
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        GIT_ROOT="${HOME}/workspace/talos/Ava-UI"
+    else
+        GIT_ROOT=$(git rev-parse --absolute-git-dir) || die "Error getting git root " $?
+    fi
+fi
 GIT_ROOT=$(readlink -f "${GIT_ROOT}")
+
 if [[ $CREATE_BRANCH == 1 ]]; then
     source="${1:-origin/HEAD}"
     user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\1/')
     NEW_BRANCH_NAME="${user}/${BRANCH_NAME/^${user}/}"
-    git -C "${GIT_ROOT}" sync
-    git -C "${GIT_ROOT}" branch "${NEW_BRANCH_NAME}" "${source}"
-    if [ $? -ne 0 ]; then
+    if ! git -C "${GIT_ROOT}" sync; then
+        die "Error sync'ing git repo" 1
+    fi
+    if ! git -C "${GIT_ROOT}" branch "${NEW_BRANCH_NAME}" "${source}"; then
         die "Error creating new branch ${NEW_BRANCH_NAME}" 1
     fi
     BRANCH_NAME="${NEW_BRANCH_NAME}"
 fi
 
-GITHUB_API=$(git -C "${GIT_ROOT}" config --get "remote.origin.url" | sed -e 's#https://github.com/\(.*\)\.git#https://api.github.com/repos/\1#')
+GITHUB_API=$(git -C "${GIT_ROOT}" config --get "remote.origin.url" | sed -e 's#https://github.com/\(.*\)\.git#https://api.github.com/repos/\1#' -e 's#git@github.com:\(.*\)\.git#https://api.github.com/repos/\1#')
 if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
     dbg "BRANCH_NAME not set, evaluating based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
-    BRANCH_NAME=$(curl -s \
+    if ! BRANCH_NAME=$(curl -f -s -S \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
-        $GITHUB_API/pulls/$PULL_REQUEST_ID |
-        jq -r .head.ref)
-    if [ $? -ne 0 ]; then
+        "$GITHUB_API/pulls/$PULL_REQUEST_ID" |
+        jq -r .head.ref); then
         die "Error retrieving branch name from github" 1
     fi
 fi
