@@ -43,8 +43,10 @@
 [mergetool "VSCodeMerge"]
 	cmd = code --wait --merge "${MERGED}"
 [pretty]
+	# Generates a markdown checklist of commits
 	branchcompare=- [ ] %C(bold cyan)%h -- %C(bold green)@%an -- %C(bold red)%ad %Creset(%C(bold yellow)%N%-%Creset)%n      %s%-
-	onelinelog=%C(bold yellow)%N%- %Creset%ad%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
+	# %Short author date% %ref names% %subject% %Author Name% -- %commit hash%
+	onelinelog=%as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
 [pull]
 	rebase = true
 [push]

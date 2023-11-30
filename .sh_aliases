@@ -1,4 +1,7 @@
 # shellcheck shell=bash
+
+# NOTE: This aliases file is sourced from both .zshrc and .bashrc, so must be compatible with both shells
+
 # enable color support of ls and also add handy aliases
 if [[ -x /usr/bin/dircolors ]]; then
     if [[ -r ~/.dircolors ]]; then eval "$(dircolors -b ~/.dircolors)"; else eval "$(dircolors -b)"; fi

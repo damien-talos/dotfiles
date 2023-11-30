@@ -19,6 +19,15 @@ unreview() {
         if [[ "$(pwd)" == "$CHECKOUT_PATH" ]]; then
             cd $GIT_ROOT
         fi
+        # Delete the directory first using `rmdir`, which is almost instantaneous
+        rmdir $CHECKOUT_PATH || {
+            echo -e "${RED}Error removing directory $CHECKOUT_PATH${RESET}"
+            return 1
+        }
+
+    fi
+    if git -C $GIT_ROOT worktree list | grep -v $CHECKOUT_PATH; then
+        # Cleanup the git worktree from the index
         git -C $GIT_ROOT worktree remove $CHECKOUT_PATH || {
             echo -e "${RED}Error removing worktree for PR $PULL_REQUEST_ID${RESET}"
             return 1

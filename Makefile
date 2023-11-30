@@ -15,7 +15,7 @@ build/shellcheck.target: $(BASH_SCRIPTS)
 
 git_config: ~/.gitconfig ~/.gitaliases
 bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases ~/.talos_aliases
-zsh_config: ~/.zshrc ~/.zshenv ~/.zsh_aliases ~/.talos_aliases
+zsh_config: ~/.zshrc ~/.zshenv ~/.zprofile ~/.zsh_aliases ~/.talos_aliases
 x_config: ~/.xprofile
 
 install_config_files: git_config bash_config zsh_config x_config

@@ -108,16 +108,16 @@ source_or_ignore "$NVM_DIR/nvm.sh"          # This loads nvm
 source_or_ignore "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 ### LOAD AVA ENVIRONMENT VARS
-source_or_ignore "/home/damien/workspace/talos/env/ava-vars.sh"
+source_or_ignore "$HOME/workspace/talos/env/ava-vars.sh"
 ### END LOAD AVA ENVIRONMENT VARS
 
 # Google cloud
 source_or_err /snap/google-cloud-cli/current/path.bash.inc
 source_or_err /snap/google-cloud-cli/current/completion.bash.inc
 
-# [ -f /home/damien/workspace/shellcheck-repl/shellcheck-repl.bash ] && source "/home/damien/workspace/shellcheck-repl/shellcheck-repl.bash"
+# [ -f $HOME/workspace/shellcheck-repl/shellcheck-repl.bash ] && source "$HOME/workspace/shellcheck-repl/shellcheck-repl.bash"
 
-# for d in ~/workspace/talos/Ava-UI/.git/worktrees/*; do if [ ! -f "$(cat $d/gitdir)" ]; then TARGET=$(cat "$d/gitdir"); mkdir -p $(dirname "$TARGET") && echo "gitdir: $d" > $TARGET; fi; done
+# for d in $HOME/workspace/talos/Ava-UI/.git/worktrees/*; do if [ ! -f "$(cat $d/gitdir)" ]; then TARGET=$(cat "$d/gitdir"); mkdir -p $(dirname "$TARGET") && echo "gitdir: $d" > $TARGET; fi; done
 
 # PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
 export PATH

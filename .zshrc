@@ -1,17 +1,26 @@
 #!/bin/zsh
 # shellcheck shell=zsh
+
+# zsh startup file order:
+# $ZDOTDIR/.zshenv
+# $ZDOTDIR/.zprofile
+# $ZDOTDIR/.zshrc   <-- We are here right now
+# $ZDOTDIR/.zlogin
+# $ZDOTDIR/.zlogout
+
 autoload -Uz compinit && compinit
 
-unsetopt auto_cd
-export cdpath=($HOME/.links) # Allow `cd`ing to links in the links directory
-setopt auto_pushd
-setopt chase_links
-setopt pushd_ignore_dups
-setopt inc_append_history
-setopt hist_ignore_dups
-setopt hist_expire_dups_first
-setopt hist_find_no_dups
-setopt prompt_subst
+unsetopt auto_cd              # If a command is not found, do not attempt to treat it as a `cd` to a path
+export cdpath=($HOME/.links)  # Allow `cd`ing to links in the links directory
+setopt auto_pushd             # Automatically push directories onto the directory stack
+setopt chase_links            # Resolve symbolic links to their true values when changing directory
+setopt pushd_ignore_dups      # Don’t push multiple copies of the same directory onto the directory stack
+setopt inc_append_history     # New history lines are added to the $HISTFILE incrementally (as soon as they are entered), rather than waiting until the shell exits
+setopt hist_ignore_dups       # Do not enter command lines into the history list if they are duplicates of the previous event.
+setopt hist_expire_dups_first # Cause the oldest history event that has a duplicate to be lost before losing a unique event from the list.
+setopt hist_find_no_dups      # When searching for history entries in the line editor, do not display duplicates of a line previously found, even if the duplicates are not contiguous.
+setopt prompt_subst           # Parameter expansion, command substitution and arithmetic expansion are performed in prompts
+setopt pushd_minus            # `cd -` will go back to the last directory you were in
 
 source_or_err ~/.zsh_aliases
 
@@ -26,12 +35,32 @@ if [ -d ~/.config/zsh/functions.d ]; then
 fi
 
 # Load version control information
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git
+# autoload -Uz vcs_info
+# zstyle ':vcs_info:*' enable git
 
 ####################
 ### PROMPT SETUP ###
 ####################
+
+set_git_prompt() {
+    # Called only one time, in set_prompt
+    # Git working branch stuff
+    GIT_EXEC_PATH="$(git --exec-path 2>/dev/null)"
+    COMPLETION_PATH="${GIT_EXEC_PATH%/libexec/git-core}"
+    COMPLETION_PATH="${COMPLETION_PATH%/lib/git-core}"
+    COMPLETION_PATH="$COMPLETION_PATH/share/git-core"
+    # COMPLETION_PATH="$HOME"
+
+    unset GIT_PS1_SHOWDIRTYSTATE     # don't enable, too slow
+    unset GIT_PS1_SHOWUNTRACKEDFILES # don't enable, too slow
+    unset GIT_PS1_SHOWUPSTREAM       # don't enable, too slow
+    export GIT_PS1_OMITSPARSESTATE=1 # disables another check
+
+    # source_or_err "$COMPLETION_PATH/git-completion.zsh"
+    source_or_err "$COMPLETION_PATH/git-prompt.sh"
+}
+
+set_git_prompt
 
 # Set FIRST_PROMPT=1 if it currently has no value
 # Ensures that we don't try to calculate previous command
@@ -103,7 +132,7 @@ function precmd() {
     # to see if we are at a prompt or not
     AT_PROMPT=1
 
-    vcs_info
+    # vcs_info
 
     # Escape code definitions
     # PromptBlue='\[\033[01;34m\]'
@@ -148,8 +177,9 @@ function precmd() {
     PROMPT+="@ %F{yellow}%~%f" # current working directory
 
     # PROMPT+="$PromptCyan" # change color to cyan
-    # GIT_PROMP=$([ "$(type -t __git_ps1)" == function ] && __git_ps1) # bash function
-    PROMPT="$PROMPT %F{cyan}${vcs_info_msg_0_}%f"
+    GIT_PS1=$([[ "$(whence -w __git_ps1)" == *function ]] && __git_ps1) # bash function
+    # PROMPT="$PROMPT %F{cyan}${vcs_info_msg_0_}%f"
+    PROMPT="$PROMPT%F{cyan}$GIT_PS1%f"
 
     # PROMPT="$PROMPT"'\[\033[0m\]' # change color
     PROMPT="$PROMPT"$'\n' # new line
@@ -161,8 +191,7 @@ function precmd() {
 }
 
 # Format the vcs_info_msg_0_ variable
-zstyle ':vcs_info:git*' formats "%{$fg[blue]%}(%b)%{$reset_color%}%m%u%c%{$reset_color%} "
+# zstyle ':vcs_info:git*' formats "%{$fg[blue]%}(%b)%{$reset_color%}%m%u%c%{$reset_color%} "
 
 # PROMPT='%n@%m %1~ %#'
 # export PROMPT='%? %F{red}%*%f @ %F{yellow}%~%f %F{cyan}${vcs_info_msg_0_}%f'$'\n''λ '
-
