@@ -27,14 +27,22 @@ function regen_instances() {
 function terminal_bg_color() {
     exec </dev/tty
     oldstty=$(stty -g)
-    stty raw -echo min 0
-    col=11 # background
-    #          OSC   Ps  ;Pt ST
-    echo -en "\033]${col};?\033\\" >/dev/tty # echo opts differ w/ OSes
+    stty raw -echo min 0 time 2
     result=
-    if IFS=';' read -r -d '\' color; then
-        result=$(echo $color | sed 's/^.*\;//;s/[^rgb:0-9a-f/]//g')
+    current_shell=$(ps -o comm= $$)
+    if [[ "${current_shell}" =~ bash ]]; then
+        echo -en "\033]11;?\033\\" >/dev/tty # request current background color
+        if IFS=';' read -r -d '\' -n 24 color; then
+            result="$color"
+        fi
+    else
+        echo -en "\033]11;?\033\\" >/dev/tty # request current background color
+        sleep 0.0001
+        if IFS=';' read -r -d '\' -t 0 -k 24 color; then
+            result="$color"
+        fi
     fi
+    result=$(echo "$result" | sed 's/^.*\;//;s/[^rgb:0-9a-f/]//g')
     stty $oldstty
     echo $result
 }
