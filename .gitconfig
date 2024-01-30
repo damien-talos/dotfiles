@@ -47,6 +47,10 @@
 	branchcompare=- [ ] %C(bold cyan)%h -- %C(bold green)@%an -- %C(bold red)%ad %Creset(%C(bold yellow)%N%-%Creset)%n      %s%-
 	# %Short author date% %ref names% %subject% %Author Name% -- %commit hash%
 	onelinelog=%as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
+	# %Short author date% %ref names% %Author Name% -- %commit hash%
+	# %subject%
+	# %body%
+	multilinelog=%as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h%+b
 [pull]
 	rebase = true
 [push]

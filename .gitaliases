@@ -25,6 +25,8 @@
     gedrc = config -e --global
     ### View commit history, with graph layout to show merges / etc.
     hist = log --pretty=onelinelog --date=short --graph --color=always
+    ### View commit history, with graph layout to show merges / etc.
+    histm = log --pretty=multilinelog --date=short --graph --color=always
     ### List worktrees
     lsw = worktree list
     ### Create a new git branch, prefixed by `${user}/`, e.g. to create the branch "damien/sc-12345-hotfix" from origin/release-v3.14.15 - '\033[2m\033[3mgit newbranch sc-12345-hotfix origin/release-v3.14.15\033[0m'
