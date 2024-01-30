@@ -1,0 +1,132 @@
+#!/bin/bash
+# ------------------------------------------------ #
+# Attempt to close any worktrees for completed PRs #
+# ------------------------------------------------ #
+
+set -o pipefail
+
+# Get command info
+CMD_PWD=$(pwd)
+CMD="$0"
+CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
+RED="\033[01;31m"
+RESET="\033[00m"
+
+# BEGIN SCRIPT VARIABLES
+[ -n "$VERBOSE" ] || VERBOSE=0
+# END SCRIPT VARIABLES
+
+out() { echo -e "$(date +%Y-%m-%dT%H:%M:%SZ): $*"; }
+err() { out "$*" 1>&2; }
+vrb() { if [ $VERBOSE -gt 1 ]; then out "$@"; fi; }
+dbg() { if [ $VERBOSE -gt 0 ]; then err "$@"; fi; }
+die() { err "EXIT: ${RED}$1${RESET}" && [ "$2" ] && [ "$2" -ge 0 ] && exit "$2" || exit 1; }
+
+# Show help function to be used below
+show_help() {
+
+    awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
+    # echo "$CMD attempts to auto-close unneeded worktrees"
+    echo "USAGE: $(basename "$CMD") [arguments]"
+    echo "ARGS:"
+    MSG=$(awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -e 's/)/\t/' | awk -F'\t' '/^-/ {printf "  %-6s%-20s%s\n", $1, (NF<3) ? "" : $2, (NF<3) ? $2 : $3}')
+    # echo -e "$MSG"
+    EMSG=$(eval "echo \"$MSG\"")
+    echo "$EMSG"
+}
+
+show_variables() {
+    MSG=$(awk '/# BEGIN SCRIPT VARIABLES/,/# END SCRIPT VARIABLES/{if (match($0,/# END SCRIPT VARIABLES/)) exit; print;}' "$CMD" |
+        sed -e '/^#/d' -e 's/^\[ -n "\$//' -e 's/".*//' |
+        sed -Ee 's/(.+)/dbg "\1=\${\1}"/')
+    eval "$MSG"
+}
+
+POSITIONAL=()
+
+NARGS=-1
+while [ "$#" -ne "$NARGS" ]; do
+    NARGS=$#
+    case $1 in
+    # BEGIN SWITCHES
+    -h | --help) # This help message
+        show_help
+        exit 0
+        ;;
+    -v | --verbose) # Enable verbose messages (DEFAULT: $VERBOSE)
+        VERBOSE=$((VERBOSE + 1)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
+    -vv) # Enable more verbose messages
+        VERBOSE=$((VERBOSE + 2)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+        ;;
+    -vvv) # Enable extra verbose messages
+        VERBOSE=$((VERBOSE + 3)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+        ;;
+    *) # unknown option, save it in an array for later
+        # if [ "${1:0:1}" = "-" ]; then
+        #     new_args=$(echo "$1" | grep -o '[[:alnum:]]' | sed -E -e 's/^/-/')
+        #     echo "${new_args}"
+        # fi
+        POSITIONAL+=("$1") && shift
+        ;;
+        # END SWITCHES
+    esac
+done
+
+if [[ $VERBOSE -gt 2 ]]; then
+    set -x
+fi
+
+set -e
+
+set -- "${POSITIONAL[@]}"
+
+urlencode() {
+    local string="${1}"
+    local strlen=${#string}
+    local encoded=""
+    local pos c o
+
+    for ((pos = 0; pos < strlen; pos++)); do
+        c=${string:$pos:1}
+        case "$c" in
+        [-_.~a-zA-Z0-9]) o="${c}" ;;
+        *) printf -v o '%%%02x' "'$c" ;;
+        esac
+        encoded+="${o}"
+    done
+    echo "${encoded}"  # You can either set a return variable (FASTER)
+    REPLY="${encoded}" #+or echo the result (EASIER)... or both... :p
+}
+
+git worktree list --porcelain | grep worktree | sed -e 's/worktree //' | while IFS= read -r worktree; do
+    printf "Worktree: %s\n", "${worktree}"
+    WORKTREE_BRANCH=$(git -C "${worktree}" rev-parse --abbrev-ref HEAD)
+    PULL_REQUEST_ID=$(echo "${worktree}" | sed -e 's/.*pr\([[:digit:]]\)/\1/p;d')
+    if [ -z "${PULL_REQUEST_ID}" ]; then
+        GITHUB_RESPONSE=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/search/issues?q=is%3Apr%20repo%3Atalostrading%2FAva-UI%20head%3A$(urlencode $WORKTREE_BRANCH))
+        PULL_REQUEST_ID=$(printf "%s" "$GITHUB_RESPONSE" | jq -r .items[0].number)
+    fi
+    if [ ! -z "${PULL_REQUEST_ID}" ]; then
+        GITHUB_RESPONSE=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/talostrading/Ava-UI/pulls/$PULL_REQUEST_ID)
+        PR_STATUS=$(printf "%s" "$GITHUB_RESPONSE" | jq -r .state)
+        PR_BRANCH=$(printf "%s" "$GITHUB_RESPONSE" | jq -r .head.ref)
+        printf " - PR: ${PULL_REQUEST_ID}\n"
+        printf " - PR Status: ${PR_STATUS}\n"
+        printf " - PR Branch: ${PR_BRANCH}\n"
+    # else
+    #     GITHUB_RESPONSE=$(curl -s \
+    #         -H "Authorization: token $GITHUB_TOKEN" \
+    #         -H "Accept: application/vnd.github.v3+json" \
+    #         https://api.github.com/repos/talostrading/Ava-UI/branches/$WORKTREE_BRANCH)
+    #     PR_STATUS=$(printf "%s" "$GITHUB_RESPONSE" | jq -r .state)
+    #     printf " - PR: ${PULL_REQUEST_ID}\n"
+    #     printf " - PR Status: ${PR_STATUS}\n"
+
+    fi
+done
