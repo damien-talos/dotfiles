@@ -26,7 +26,7 @@ unreview() {
         }
 
     fi
-    if git -C $GIT_ROOT worktree list | grep -v $CHECKOUT_PATH; then
+    if git -C $GIT_ROOT worktree list --porcelain | grep -e "worktree $CHECKOUT_PATH"; then
         # Cleanup the git worktree from the index
         git -C $GIT_ROOT worktree remove $CHECKOUT_PATH || {
             echo -e "${RED}Error removing worktree for PR $PULL_REQUEST_ID${RESET}"
