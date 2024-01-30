@@ -2,7 +2,7 @@ BASH_SCRIPTS = $(shell find . -type f -name '*bash*')
 ZSH_SCRIPTS = $(shell find . -type f -name '*zsh*')
 
 bins :=$(patsubst %,~/%,$(filter-out bin/template.sh,$(wildcard bin/*)))
-functions := $(patsubst %,~/%,$(shell find .config/ -type f))
+functions := $(patsubst %,~/%,$(shell find .config -type f -o -type l))
 
 all: shellcheck
 install: install_config_files install_bins install_functions
