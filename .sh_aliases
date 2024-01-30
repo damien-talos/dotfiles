@@ -30,7 +30,7 @@ else
 fi
 
 alias la='ls --color=auto -alF'
-alias ll='la'
+# alias ll='la'
 alias tools='echo "gron\nyq"'
 alias sucode="sudo code --user-data-dir='/root/.config/Code/' --no-sandbox --disable-gpu-sandbox --"
 
@@ -49,3 +49,13 @@ alias macbook='ssh -L 3001:localhost:3001 -L 3002:localhost:3002 -L 3003:localho
 # alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
 
 source_or_err ~/.talos_aliases
+
+function killp() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: killp <process name> [<kill args>]"
+        return 1
+    fi
+    search=$1
+    shift
+    ps -eaf | awk '/rg/{next;} /'"${search}"'/{print $2}' | xargs -I{} kill "$@" {}
+}
