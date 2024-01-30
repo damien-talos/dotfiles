@@ -4,3 +4,5 @@
 # $ZDOTDIR/.zshrc
 # $ZDOTDIR/.zlogin
 # $ZDOTDIR/.zlogout
+
+[ -d '/Volumes/RAMDisk' ] || diskutil erasevolume HFS+ "RAMDisk" "$(hdiutil attach -nomount ram://16777216)"
