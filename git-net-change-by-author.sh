@@ -212,10 +212,10 @@ if [[ $CALC_TOTAL_OWNERSHIP == 1 ]]; then
     (
         printf "Author|Lines owned|Percentage lines owned\n"
         LC_ALL=C git ls-files |
-            sed -E '/.*\.(svg|json)$/d; /packages\/(charting_library|tradingview|datafeeds)/d; /^out\//d; /apps\/\w+\/public/d; /packages\/kyoko\/src\/types\/types.ts/d; /\/build\//d; /packages\/shared\/dist\//d;' |
+            LC_ALL=C sed -E '/.*\.(svg|json)$/d; /packages\/(charting_library|tradingview|datafeeds)/d; /^out\//d; /apps\/\w+\/public/d; /packages\/kyoko\/src\/types\/types.ts/d; /\/build\//d; /packages\/shared\/dist\//d;' |
             xargs -I{} git blame --line-porcelain {} |
-            sed -n '/^author /{ h; }; /^author-mail /{ x; G; s/\n/ /g;s/author\(-mail\)\? //g; p; }' |
-            awk 'BEGIN {total=0;} {total += 1; authors[$0] += 1; } END { for (author in authors) { cmd = sprintf("git check-mailmap \"%s\"", author); cmd | getline authorIdent; close(cmd) ; printf("%s|%d|%.2f%%\n", authorIdent, authors[author], authors[author] / total * 100); } printf("Total lines|%d|100%%\n", total); }' |
+            LC_ALL=C sed -n '/^author /{ h; }; /^author-mail /{ x; G; s/\n/ /g;s/author\(-mail\)\? //g; p; }' |
+            LC_ALL=C awk 'BEGIN {total=0;} {total += 1; authors[$0] += 1; } END { for (author in authors) { cmd = sprintf("git check-mailmap \"%s\"", author); cmd | getline authorIdent; close(cmd) ; printf("%s|%d|%.2f%%\n", authorIdent, authors[author], authors[author] / total * 100); } printf("Total lines|%d|100%%\n", total); }' |
             sort -t "|" --key=2n
     ) |
         column -t -s "|"
