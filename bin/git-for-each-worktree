@@ -3,13 +3,17 @@
 
 git worktree list --porcelain | grep worktree | sed -e 's/worktree //' | while IFS= read -r worktree; do
     (
+        printf "\n##%s##\n" "$(echo "${worktree}" | sed -E 's/./#/g')"
+        printf "# %s #" "${worktree}"
+        printf "\n##%s##\n" "$(echo "${worktree}" | sed -E 's/./#/g')"
+
         exec > >(
             trap "" INT TERM
-            sed "s/^/${worktree//\//\\\/}: /"
+            sed "s/^/${worktree//\//\\/}: /"
         )
         exec 2> >(
             trap "" INT TERM
-            sed "s/^/${worktree//\//\\\/}: /" >&2
+            sed "s/^/${worktree//\//\\/}: /" >&2
         )
         cd "${worktree}" && eval "$*"
     )
