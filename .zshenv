@@ -8,14 +8,22 @@
 # $ZDOTDIR/.zlogout
 
 PATH="$HOME/bin:/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
-# Remove duplicate entries from PATH - this can happen if we re-source our files
 export PATH
 export EDITOR=code
-GITHUB_TOKEN=$(cat ~/.github_token)
-export GITHUB_TOKEN
 
 RED='\033[01;31m'
 RESET='\033[00m'
+
+# read_env_variable_from_file <variable_name>
+read_env_variable_from_file() {
+  variable_name="${1:u}_TOKEN"
+  file_name="${2:-$HOME/.${1}_token}"
+  if [ -f "$file_name" ]; then
+    export "$variable_name"="$(cat "$file_name")"
+  else
+    echo -e "${RED}Unable to find $file_name${RESET}"
+  fi
+}
 
 source_or_err() {
   if [ -f "$1" ]; then
@@ -34,8 +42,11 @@ source_or_ignore() {
   fi
 }
 
-source_or_err ~/.sentry_token
-source_or_err ~/.shortcut_token
+read_env_variable_from_file "github"
+read_env_variable_from_file "atlassian"
+
+source_or_ignore ~/.sentry_token
+# source_or_err ~/.shortcut_token
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
