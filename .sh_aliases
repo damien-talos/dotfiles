@@ -34,6 +34,8 @@ alias current-paths='echo $PATH | awk -F : '"'"'BEGIN {OFS="\n"}; {$1=$1; print 
 alias dirs='dirs -v'
 
 alias macbook='ssh -L 3001:localhost:3001 -L 3002:localhost:3002 -L 3003:localhost:3003 -L 8089:localhost:8089 ca-dschoof-02.local'
+# Remove any ram disks that have been created
+alias remove-ram-disks="ll /dev | rg -e 'damien\.schoof.* disk' | sed -E 's/.* (disk)/\1/' | xargs -I{} hdiutil detach -verbose '/dev/{}'"
 
 # alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
 
