@@ -12,17 +12,6 @@ if [[ -x /usr/bin/dircolors ]]; then
     alias egrep='egrep --color=auto'
 fi
 
-current_shell=$(ps -o comm= $$)
-if [[ "${current_shell}" =~ bash ]]; then
-    alias resource='source ~/.bashrc'
-    alias edrc='$EDITOR $(readlink -f ~/.bashrc)'
-    if [[ ! -z "$(which lsd)" ]]; then alias ls='lsd'; fi
-    alias lspath="which \$(compgen -A function -abck) | sort -u"
-elif [[ "${current_shell}" =~ zsh ]]; then
-    alias resource='source ~/.zshenv && source ~/.zshrc'
-    alias edrc='$EDITOR ~/.zshrc'
-fi
-
 if command -v lsd >/dev/null 2>&1; then
     alias ls='lsd'
 else

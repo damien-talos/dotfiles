@@ -1,1 +1,10 @@
-.sh_aliases
+# shellcheck shell=sh
+# _should_ really be zsh, but that's not supported in shellcheck
+
+# Add the shared aliases
+. ./.sh_aliases
+
+# zsh specific aliases
+alias resource='source ~/.zshenv && source ~/.zshrc'
+alias edrc='$EDITOR ~/.zshrc'
+alias remove-ram-disks="ll /dev | rg -e 'damien\.schoof.*disk' | sed -E 's/.* (disk)/\1/' | xargs -I{} hdiutil detach '/dev/{}'"

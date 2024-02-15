@@ -195,3 +195,6 @@ function precmd() {
 
 # PROMPT='%n@%m %1~ %#'
 # export PROMPT='%? %F{red}%*%f @ %F{yellow}%~%f %F{cyan}${vcs_info_msg_0_}%f'$'\n''λ '
+
+# bun completions
+[ -s "/Users/damien.schoof/.bun/_bun" ] && source "/Users/damien.schoof/.bun/_bun"
