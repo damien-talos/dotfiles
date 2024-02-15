@@ -324,5 +324,5 @@ function _talos_fn_complete {
 [ -e "${BIN_DIR}/prod-aliases.sh" ] && source "${BIN_DIR}/prod-aliases.sh"
 [ -e "${BIN_DIR}/uat-aliases.sh" ] && source "${BIN_DIR}/uat-aliases.sh"
 
-alias startStaging='([ -d apps/ava ] && cd apps/ava || true; BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:staging --verbose --progress | cat)'
-alias startUat='([ -d apps/ava ] && cd apps/ava || true; BROWSER=none TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true yarn start:uat --verbose --progress | cat)'
+alias startStaging='([ -d apps/ava ] && cd apps/ava || true; bun start:staging)'
+alias startUat='([ -d apps/ava ] && cd apps/ava || true; bun start:staging)'

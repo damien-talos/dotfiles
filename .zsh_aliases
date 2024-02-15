@@ -2,7 +2,7 @@
 # _should_ really be zsh, but that's not supported in shellcheck
 
 # Add the shared aliases
-. ./.sh_aliases
+. ~/.sh_aliases
 
 # zsh specific aliases
 alias resource='source ~/.zshenv && source ~/.zshrc'

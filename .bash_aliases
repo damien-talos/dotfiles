@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 
-source ./.sh_aliases
+source ~/.sh_aliases
 
 alias resource='source ~/.bashrc'
 alias edrc='$EDITOR $(readlink -f ~/.bashrc)'
