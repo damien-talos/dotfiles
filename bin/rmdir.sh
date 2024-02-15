@@ -4,9 +4,6 @@
 # --------------------------------------------- #
 
 # Get command info
-CMD_PWD=$(pwd)
-CMD="$0"
-# CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
 RED='\033[01;31m'
 RESET='\033[00m'
 
@@ -21,7 +18,7 @@ rmdir() {
 
     local returnCode=0
 
-    for target in $@; do
+    for target in "$@"; do
         if [ $# -gt 1 ]; then
             # Show name of the directory currently being deleted, when we are deleting > 1
             echo "${FUNCNAME[0]} $target"
@@ -36,12 +33,12 @@ rmdir() {
         else
             if [ ! -d "$TMPDIR" ]; then
                 # Make the temp dir if it doesn't yet exist
-                mkdir -p $TMPDIR
+                mkdir -p "$TMPDIR"
             fi
             # In case we are moving dirs with the same name, find a unique target dir nae
             declare TMPDIR_TARGET=$TMPDIR/${target##*/}
             while [ -d "$TMPDIR_TARGET" ]; do
-                TMPDIR_TARGET=$TMPDIR/${target##*/}~$RANDOM
+                TMPDIR_TARGET="$TMPDIR/${target##*/}~$RANDOM"
             done
             # Use cmd for the move because it seems to fail less often
             mv "${target%/}" "$TMPDIR_TARGET" >/dev/null
@@ -64,8 +61,7 @@ rmdir() {
     return $returnCode
 }
 
-
-if [[ "$0" == "$BASH_SOURCE" ]]; then
+if [[ "$0" == "${BASH_SOURCE[0]}" ]]; then
     # Script was run as a command
-    rmdir $*
+    rmdir "$*"
 fi
