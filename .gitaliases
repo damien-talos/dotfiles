@@ -33,6 +33,7 @@
     lsw = worktree list
     ### Create a new git branch, prefixed by `${user}/`, e.g. to create the branch "damien/sc-12345-hotfix" from origin/release-v3.14.15 - '\033[2m\033[3mgit newbranch sc-12345-hotfix origin/release-v3.14.15\033[0m'
     newbranch = "!f() { \
+                [ $# -gt 0 ] || { echo \"Usage: git newbranch <branch-name> [source-branch]\"; return 1; }; \
                 target=\"${1:-no-branch-name}\"; [ $# -gt 0 ] && shift; \
                 source=\"${1:-origin/HEAD}\"; [ $# -gt 0 ] && shift; \
                 user=$(whoami | sed -E 's/(.+)[^[:alnum:]].*/\\1/'); \
@@ -47,7 +48,9 @@
     pushup = -c push.default=current push -u
     ### Rebase the current branch onto origin/HEAD
     reup = !git sync && echo "Rebasing onto $(git forked-from)" && git rebase "$(git forked-from)"
+    # Shortcut to show current repo status
     st = status
+    # Default to including untracked changes in a stash
     stash = stash -u
     ### Grep through all stashes - e.g. '\033[2m\033[3mgit stashgrep "fix"\033[0m'
     stashgrep = "!f() { \
