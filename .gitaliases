@@ -14,15 +14,15 @@
     ### Debug git aliases - e.g. '\033[2m\033[3mgit debug pushup\033[0m'
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
     ### Get the current `.git` directory (works for worktrees also)
-    dir=rev-parse --git-dir
+    dir = rev-parse --git-dir
     ### Edit the global gitaliases file
     edalias = "!f() { git config -e -f $(git config --show-origin alias.edalias | sed -e 's/file://' -e 's/[[:space:]]\\+.*//') ; }; f"
     ### Edit the local .git/config file
     edrc = config -e
     ### Fix the previous commit, amend, but keep the same message etc.
     fix = commit --amend --no-edit
-    ### See which branch this one is forked from
-    forked-from = "!f() { git config --default 'origin/HEAD' --get \"branch.$(git symbolic-ref --short -q HEAD).forked-from\" ; }; f"
+    ### Get / set the base branch for the current branch - e.g. '\033[2m\033[3mgit forked-from\033[0m' OR '\033[2m\033[3mgit forked-from origin/releases/v2.45.0\033[0m'
+    forked-from = "!f() { forked_from_config_name=\"branch.$(git symbolic-ref --short -q HEAD).forked-from\"; if [ $# -eq 0 ]; then git config --default 'origin/HEAD' --get \"${forked_from_config_name}\"; else git config \"${forked_from_config_name}\" \"$@\"; fi ; }; f"
     ### Edit the global .git/config file
     gedrc = config -e --global
     ### View commit history, with graph layout to show merges / etc.
