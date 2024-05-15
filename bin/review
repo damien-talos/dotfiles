@@ -32,12 +32,15 @@ dbg() { if [ $VERBOSE -gt 0 ]; then err "$@"; fi; }
 die() { err "EXIT: ${RED}$1${RESET}" && [ "$2" ] && [ "$2" -ge 0 ] && exit "$2" || exit 1; }
 
 # Show help function to be used below
+# This function reads the source of this shell file, and extracts the help text
+# Help text is found between the `# BEGIN SWITCHES` and `# END SWITCHES` comments
+# Arbitrary text can be added to the help text by adding a line starting with `## `
 show_help() {
     awk 'NR>1{print} /^(###|$)/{exit}' "$CMD"
     echo "review checks out a git worktree into the ramdisk"
     echo "USAGE: $(basename "$CMD") [arguments] [pull request id]"
     echo "ARGS:"
-    MSG=$(awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -e 's/|/\t/' -e 's/)/\t/' | awk -F'\t' '/^-/ {printf "  %-6s%-20s%s\n", $1, $2, $3}')
+    MSG=$(awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -E -e 's/(\|([^)]+))?\)/\t\2\t/' | awk -F'\t' '/^-/ {printf "  %-6s%-20s%s\n", $1, $2, $3} /^##/ {printf "%s\n", substr($1, 3)}')
     # echo -e "$MSG"
     EMSG=$(eval "echo \"$MSG\"")
     echo "$EMSG"
@@ -57,12 +60,6 @@ while [ "$#" -ne "$NARGS" ]; do
     NARGS=$#
     case $1 in
     # BEGIN SWITCHES
-    -h | --help) # This help message
-        show_help
-        exit 0
-        ;;
-    -v | --verbose) # Enable verbose messages (DEFAULT: $VERBOSE)
-        VERBOSE=$((VERBOSE + 1)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
     -e | --edit) # Open editor after checkout (DEFAULT: $OPEN_EDITOR)
         shift && OPEN_EDITOR=1 && vrb "#-INFO: OPEN_EDITOR=$OPEN_EDITOR" ;;
     -c | --create-branch) # Create the branch if needed
@@ -85,11 +82,19 @@ while [ "$#" -ne "$NARGS" ]; do
         shift && GIT_ROOT="$1" && shift && vrb "#-INFO: GIT_ROOT=$GIT_ROOT" ;;
     -ecd | --echo-cd) # Echo the CWD before exit (to allow calling function to cd / source) (DEFAULT: $ECHO_CURRENT_DIR)
         shift && ECHO_CURRENT_DIR=1 && vrb "#-INFO: ECHO_CURRENT_DIR=$ECHO_CURRENT_DIR" ;;
-    -vv)
-        VERBOSE=$((VERBOSE + 2)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+    -h | --help) # Show this help message
+        show_help
+        exit 0
         ;;
-    -vvv)
-        VERBOSE=$((VERBOSE + 3)) && shift && vrb "#-INFO: VERBOSE=$VERBOSE"
+    -v | --verbose) # Increase verbosity (repeat for higher level) (DEFAULT: $VERBOSE)
+        shift && VERBOSE=$((VERBOSE + 1)) && vrb "#-INFO: VERBOSE=$VERBOSE" ;;
+    # Would be nice to treat these as the equivalent of -vv, -vvv, etc but that's a bit more complex
+    # This is a good enough solution for now
+    -vv) # Increase verbosity to "verbose" level
+        shift && VERBOSE=$((VERBOSE + 2)) && vrb "#-INFO: VERBOSE=$VERBOSE"
+        ;;
+    -vvv) # Increase verbosity to "trace" level
+        shift && VERBOSE=$((VERBOSE + 3)) && vrb "#-INFO: VERBOSE=$VERBOSE"
         ;;
     *) # unknown option, save it in an array for later
         # if [ "${1:0:1}" = "-" ]; then
@@ -122,13 +127,20 @@ if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
     fi
 fi
 
+# Find the github api url for the repo, based on the remote origin
+# Note: remote origin is assumed to be in one of the following formats:
+#   - git@github.com:<user>/<repo>.git
+#   - https://github.com/<user>/<repo>.git
+GITHUB_API=$(git -C "${GIT_ROOT}" config --get "remote.origin.url" | sed -e 's#https://github.com/\(.*\)\.git#https://api.github.com/repos/\1#' -e 's#git@github.com:\(.*\)\.git#https://api.github.com/repos/\1#')
+
 GITHUB_BRANCH_NAME=""
 if [ -n "$PULL_REQUEST_ID" ]; then
+    # A pull request ID was specified, so we need to get the branch name from github
     dbg "Evaluating remote branch name based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
     if ! GITHUB_BRANCH_NAME=$(curl -f -s -S \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/repos/talostrading/Ava-UI/pulls/$PULL_REQUEST_ID |
+        "${GITHUB_API}/pulls/${PULL_REQUEST_ID}" |
         jq -r .head.ref); then
         die "Error retrieving branch name from github" 1
     fi
@@ -136,12 +148,16 @@ if [ -n "$PULL_REQUEST_ID" ]; then
 fi
 
 if [ -z "${GIT_ROOT}" ]; then
+    # If GIT_ROOT is not set, try to determine it based on the current directory
     if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        # If we're not in a git repo, default to the Ava-UI repo
         GIT_ROOT="${HOME}/workspace/talos/Ava-UI"
     else
+        # If we are in a git repo, get the root of the repo
         GIT_ROOT=$(git rev-parse --absolute-git-dir) || die "Error getting git root " $?
     fi
 fi
+# Make sure GIT_ROOT is an absolute path
 GIT_ROOT=$(readlink -f "${GIT_ROOT}")
 
 if [[ $CREATE_BRANCH == 1 ]]; then
@@ -157,7 +173,6 @@ if [[ $CREATE_BRANCH == 1 ]]; then
     BRANCH_NAME="${NEW_BRANCH_NAME}"
 fi
 
-GITHUB_API=$(git -C "${GIT_ROOT}" config --get "remote.origin.url" | sed -e 's#https://github.com/\(.*\)\.git#https://api.github.com/repos/\1#' -e 's#git@github.com:\(.*\)\.git#https://api.github.com/repos/\1#')
 if [ -z "$BRANCH_NAME" ] && [ -n "$PULL_REQUEST_ID" ]; then
     dbg "BRANCH_NAME not set, evaluating based on PULL_REQUEST_ID=$PULL_REQUEST_ID"
     if ! BRANCH_NAME=$(curl -f -s -S \

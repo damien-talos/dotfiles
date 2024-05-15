@@ -109,6 +109,7 @@ source_or_ignore "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 ### LOAD AVA ENVIRONMENT VARS
 source_or_ignore "$HOME/workspace/talos/env/ava-vars.sh"
+source_or_err "$HOME/.ava_token"
 ### END LOAD AVA ENVIRONMENT VARS
 
 # Google cloud

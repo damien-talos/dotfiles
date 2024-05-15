@@ -19,7 +19,7 @@ else
 fi
 
 alias la='ls --color=auto -alF'
-# alias ll='la'
+alias ll='la'
 alias tools='echo "gron\nyq"'
 alias sucode="sudo code --user-data-dir='/root/.config/Code/' --no-sandbox --disable-gpu-sandbox --"
 
