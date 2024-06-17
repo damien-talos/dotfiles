@@ -66,3 +66,7 @@
 	name = Damien Schoof
 	email = damien.schoof@talostrading.com
 	signingkey =  30C3E8777A3618A1 #gitleaks:allow
+[gpg]
+	program = /opt/homebrew/bin/gpg
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/

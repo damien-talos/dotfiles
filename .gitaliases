@@ -46,6 +46,8 @@
     pushf = push --force-with-lease
     ### Push the current branch to origin, with the same name
     pushup = -c push.default=current push -u
+    ### Force push all branches in the chain
+    pushrefs = "!git fetch && git branch --format='%(if:notequals=)%(upstream:trackshort)%(then)%(refname:short)%(end)' --contains $(git log origin/develop..HEAD --format="%h" --reverse | head -1) | xargs -I {} git push --force-with-lease origin {}"
     ### Rebase the current branch onto origin/HEAD
     reup = !git sync && echo "Rebasing onto $(git forked-from)" && git rebase "$(git forked-from)"
     # Shortcut to show current repo status

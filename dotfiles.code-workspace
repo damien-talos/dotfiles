@@ -11,6 +11,12 @@
     "[awk]": {
       "editor.semanticHighlighting.enabled": true,
       "editor.defaultFormatter": "beaglefoot.awk-ide-vscode"
+    },
+    "files.associations": {
+      ".env*": "dotenv",
+      ".gitaliases": "gitconfig",
+      "code-stdin-*": "ansi",
+      ".gitconfig": "gitconfig"
     }
   },
   "launch": {
@@ -25,5 +31,8 @@
         "program": "${file}"
       }
     ]
+  },
+  "extensions": {
+    "recommendations": ["yy0931.gitconfig-lsp"]
   }
 }

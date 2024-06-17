@@ -17,8 +17,9 @@ git_config: ~/.gitconfig ~/.gitaliases
 bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases ~/.talos_aliases
 zsh_config: ~/.zshrc ~/.zshenv ~/.zprofile ~/.zsh_aliases ~/.talos_aliases
 x_config: ~/.xprofile
+launch_agents: ~/Library/LaunchAgents/com.user.loginscript.plist
 
-install_config_files: git_config bash_config zsh_config x_config
+install_config_files: git_config bash_config zsh_config x_config launch_agents
 
 install_bins: $(bins)
 install_functions: $(functions)
@@ -29,11 +30,11 @@ install_functions: $(functions)
 			echo "Backing up existing $@";\
 			mv "$@" "$@.bak";\
 		fi;\
-		echo "Linking $@ to $(abspath $?)";\
-		mkdir -p "$(dir $@)" && ln -s $(abspath "$?") "$@";\
-	elif [ "$(shell readlink -f \"$@\")" != "$(abspath $?)" ]; then \
-		echo "Linking $@ to $(abspath $?)";\
+		echo "Linking $@ to $(abspath "$?")";\
+		mkdir -p "$(dir "$@")" && ln -s $(abspath "$?") "$@";\
+	elif [ "$(shell readlink -f \"$@\")" != "$(abspath "$?")" ]; then \
+		echo "Linking $@ to $(abspath "$?")";\
 		echo " - Removing current link pointing to $(shell readlink -f "$@")";\
-		rm "$@"; \
-		mkdir -p "$(dir $@)" && ln -s $(abspath "$?") "$@";\
+		mv "$@" "$@.bak"; \
+		mkdir -p "$(dir "$@")" && ln -s $(abspath "$?") "$@";\
 	fi
