@@ -1,7 +1,8 @@
 #!/bin/bash
-# --------------------------------------------- #
-# Quickly / easily review a github pull request #
-# --------------------------------------------- #
+# ----------------------------------------------------------------- #
+# Quickly / easily review a github pull request.                    #
+# Now with support for checking out any branch into a new worktree. #
+# ------------------------------------------------------------------#
 
 set -o pipefail
 
@@ -40,7 +41,43 @@ show_help() {
     echo "review checks out a git worktree into the ramdisk"
     echo "USAGE: $(basename "$CMD") [arguments] [pull request id]"
     echo "ARGS:"
-    MSG=$(awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -E -e 's/(\|([^)]+))?\)/\t\2\t/' | awk -F'\t' '/^-/ {printf "  %-6s%-20s%s\n", $1, $2, $3} /^##/ {printf "%s\n", substr($1, 3)}')
+    MSG=$(
+        awk '/# BEGIN SWITCHES/,/# END SWITCHES/' "$CMD" | sed -e 's/^[[:space:]]*//' -E -e 's/(\|([^)]+))?\)/\t\2\t/' | awk -F'\t' -f <(
+            cat - <<'EOD'
+BEGIN {
+	n=1;
+	max[1]=max[2]=0;
+}
+function maxes(a,b){
+	if(length(a)>max[1])max[1]=length(a);if(length(b)>max[2])max[2]=length(b);
+}
+/^-/ {
+	sub(/^[[:space:]]*#[[:space:]]/,"", $3);
+    gsub(/^[[:space:]]+|[[:space:]]+$/,"",$1);
+    gsub(/^[[:space:]]+|[[:space:]]+$/,"",$2);
+	lines[n,1]="VAR";
+	maxes($1, $2);
+	lines[n,2]=$1;
+	lines[n,3]=$2;
+	lines[n,4]=$3;
+	n++;
+}
+/^##/ {
+	lines[n,2]=substr($1, 3);
+	n++;
+}
+END{
+	for(i=1;i<n;i++) {
+		if (lines[i,1]=="VAR") {
+			printf "  %-*s%-*s%s\n", max[1]+2, lines[i,2], max[2]+2, lines[i,3],lines[i,4];
+		} else {
+			print lines[i,2];
+		}
+	}
+}
+EOD
+        )
+    )
     # echo -e "$MSG"
     EMSG=$(eval "echo \"$MSG\"")
     echo "$EMSG"
