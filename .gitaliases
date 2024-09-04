@@ -3,6 +3,8 @@
     alias = "!git config --get-regexp '^alias\\.' | sed -E 's/alias\\.([[:alnum:]-]+).*/\\1/' | sort | xargs -I'{}' sh -c \"grep -B1 -e '^\\s\\+{}\\s*=' \\$(git config --show-origin 'alias.{}' | awk -F'[:[:space:]]' '{print \\$2}')\" - {} | awk '!(NR%2){alias=$0;gsub(/^[[:space:]]*[[:alnum:]-]+[[:space:]]*=[[:space:]]*/,\"\",alias);gsub(/\\\\033/,\"\\033\",p);print$0(p==\"\"?\"    ### \\033[3m\\033[2m\"alias\"\\033[0m\":p)}{($0 ~ /###/?p=$0:p=\"\")}'  | sed -re 's/( =)(.*)(###)/:*/g' | awk -F '*' '{printf \"\\033[1;31m%-30s\\033[0m %s\\n\", $1, $2}' | sort"
     ### View plain text definitions of git aliases
     alias-text = !git config --get-regexp '^alias\\.' | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+    ### Run `git rebase -i` without opening an editor (useful for auto-squashing commits, etc.)
+    autosquash = !git -c sequence.editor=: rebase -i --autosquash
     ### List all local branches where the upstream no longer exists - use to cleanup by e.g. '\033[2m\033[3mgit cleanup-gone | xargs git branch -d\033[0m'
     cleanup-gone = "!git branch -a --format='%(refname:short) %(upstream:track)' \
             | grep '\\[gone\\]' \
@@ -12,7 +14,7 @@
     ### Cherry-pick changes, and append the original commit hash to the end of the commit message
     cp = cherry-pick -x
     ### Debug git aliases - e.g. '\033[2m\033[3mgit debug pushup\033[0m'
-    debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+    debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 GIT_MERGE_VERBOSITY=5 git"
     ### Get the current `.git` directory (works for worktrees also)
     dir = rev-parse --git-dir
     ### Edit the global gitaliases file
@@ -25,9 +27,9 @@
     forked-from = "!f() { forked_from_config_name=\"branch.$(git symbolic-ref --short -q HEAD).forked-from\"; if [ $# -eq 0 ]; then git config --default 'origin/HEAD' --get \"${forked_from_config_name}\"; else git config \"${forked_from_config_name}\" \"$@\"; fi ; }; f"
     ### Edit the global .git/config file
     gedrc = config -e --global
-    ### View commit history, with graph layout to show merges / etc.
+    ### View commit history (single-line logs), with graph layout to show merges / etc.
     hist = log --pretty=onelinelog --date=short --graph --color=always
-    ### View commit history, with graph layout to show merges / etc.
+    ### View commit history (multi-line logs), with graph layout to show merges / etc.
     histm = log --pretty=multilinelog --date=short --graph --color=always
     ### List worktrees
     lsw = worktree list
@@ -48,6 +50,8 @@
     pushup = -c push.default=current push -u
     ### Force push all branches in the chain
     pushrefs = "!git fetch && git branch --format='%(if:notequals=)%(upstream:trackshort)%(then)%(refname:short)%(end)' --contains $(git log origin/develop..HEAD --format="%h" --reverse | head -1) | xargs -I {} git push --force-with-lease origin {}"
+    ### Interactive rebase, but adds multiline description for each commit
+    rebasemulti = !git -c sequence.editor='git multiline-sequence-editor' rebase -i
     ### Rebase the current branch onto origin/HEAD
     reup = !git sync && echo "Rebasing onto $(git forked-from)" && git rebase "$(git forked-from)"
     # Shortcut to show current repo status
@@ -64,6 +68,8 @@
             f"
     ### Stash everything but keep all changes still
     stashk = "!f() { git stash \"$@\" && git stash apply; }; f"
+    ### Show stats on a commit
+    stat = show --stat
     ### Fetch everything from origin (synchronize with origin)
     sync = fetch -p -P --all --tags
     up = pull
@@ -92,4 +98,3 @@
     # heads = branch -vv
     # rev = notes show
     # rev2sha = !git log --pretty=onelinelog --date=short --all --color=always | grep --color=always
-    # stat = show --stat

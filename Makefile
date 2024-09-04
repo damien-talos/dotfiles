@@ -30,11 +30,11 @@ install_functions: $(functions)
 			echo "Backing up existing $@";\
 			mv "$@" "$@.bak";\
 		fi;\
-		echo "Linking $@ to $(abspath "$?")";\
-		mkdir -p "$(dir "$@")" && ln -s $(abspath "$?") "$@";\
-	elif [ "$(shell readlink -f \"$@\")" != "$(abspath "$?")" ]; then \
-		echo "Linking $@ to $(abspath "$?")";\
+		echo "Linking $@ to $(abspath $?)";\
+		mkdir -p "$(dir $@)" && ln -s "$(abspath $?)" "$@";\
+	elif [ "$(shell readlink -f \"$@\")" != "$(abspath $?)" ]; then \
+		echo "Linking $@ to $(abspath $?)";\
 		echo " - Removing current link pointing to $(shell readlink -f "$@")";\
 		mv "$@" "$@.bak"; \
-		mkdir -p "$(dir "$@")" && ln -s $(abspath "$?") "$@";\
+		mkdir -p "$(dir $@)" && ln -s "$(abspath $?)" "$@";\
 	fi
