@@ -1,3 +1,4 @@
+#!/bin/bash
 # shellcheck shell=bash
 
 # NOTE: This aliases file is sourced from both .zshrc and .bashrc, so must be compatible with both shells
@@ -37,16 +38,26 @@ alias macbook='ssh -L 3001:localhost:3001 -L 3002:localhost:3002 -L 3003:localho
 # Remove any ram disks that have been created
 alias remove-ram-disks="ll /dev | rg -e 'damien\.schoof.* disk' | sed -E 's/.* (disk)/\1/' | xargs -I{} hdiutil detach -verbose '/dev/{}'"
 
+# Update all installed cargo binaries
+alias cargo-update="cargo install \$(cargo install --list | rg '^[a-z0-9_-]+ v[0-9.]+:$' | cut -f1 -d' ')"
 # alias temp-chrome="~/.local/share/flatpak/exports/bin/org.chromium.Chromium --temp-profile --user-data-dir=/tmp/${RANDOM}"
 
 source_or_err ~/.talos_aliases
 
-function killp() {
+function killp() (
     if [[ -z "$1" ]]; then
         echo "Usage: killp <process name> [<kill args>]"
         return 1
     fi
     search=$1
     shift
-    ps -eaf | awk '/rg/{next;} /'"${search}"'/{print $2}' | xargs -I{} kill "$@" {}
-}
+    # set -x
+    ps -eaf | awk '/[[:blank:]]awk[[:blank:]]/{next;} /'"${search}"'/{print $2}' | while read -r pid; do
+        echo "Kill process $(ps -p "$pid" -o pid=) ${GRAY}$(ps -p "$pid" -o command=)${RESET}? (y/N)"
+        if read -qs; then
+            kill "$@" "$pid"
+        else
+            echo "Skipping $pid"
+        fi
+    done
+)
