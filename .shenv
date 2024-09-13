@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Escape code definitions
+# BLUE='\033[01;34m'
+# CYAN='\033[01;36m'
+# WHITE='\033[01;37m'
+RED='\033[01;31m'
+GRAY='\033[01;30;1m'
+# GREEN='\033[01;32m'
+# STRIKETRHOUGH='\033[9m'
+RESET='\033[00m'
+
+# read_env_variable_from_file <variable_name>
+read_env_variable_from_file() {
+  variable_name="${1:u}_TOKEN"
+  file_name="${2:-$HOME/.${1}_token}"
+  if [ -f "$file_name" ]; then
+    export "$variable_name"="$(cat "$file_name")"
+  else
+    echo -e "${GRAY}Unable to find $file_name${RESET}"
+  fi
+}
+
+source_or_err() {
+  if [ -f "$1" ]; then
+    # shellcheck disable=1090
+    . "$1"
+  else
+    echo -e "${RED}Unable to find and source $1${RESET}"
+  fi
+}
+source_or_ignore() {
+  if [ -f "$1" ]; then
+    # shellcheck disable=1090
+    . "$1"
+  else
+    echo -e "${GRAY}Unable to find and source $1${RESET}"
+  fi
+}
+
+
+PATH=~/.yarn/bin:~/bin:~/go/bin:$PATH
+export PATH
+
+export EDITOR=code
+export FZF_DEFAULT_COMMAND='fd'
+export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."
+
+
+read_env_variable_from_file "github"
+read_env_variable_from_file "atlassian"
+read_env_variable_from_file "jira"
+read_env_variable_from_file "redocly"
+read_env_variable_from_file "figma"
+read_env_variable_from_file "circleci"
+
+source_or_ignore ~/.sentry_token
+source_or_ignore ~/.cypress-test-user-secret
+
+## LOAD AVA ENVIRONMENT VARS
+source_or_err /Users/damien.schoof/workspace/talos/env/ava-vars.sh
+source_or_err "$HOME/.ava_token"
+### END LOAD AVA ENVIRONMENT VARS
+
+export NVM_DIR="$HOME/.nvm"
+source_or_ignore "$NVM_DIR/nvm.sh" # This loads nvm
+
+source_or_ignore "$HOME/.rvm/scripts/rvm"
+
+source_or_ignore "$HOME/.cargo/env"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+PATH="$BUN_INSTALL/bin:$PATH"
+# bun completions
+source_or_ignore "$BUN_INSTALL/_bun"
+
+# Remove duplicate entries from $PATH, keep only the first one (left-to-right)
+PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
+export PATH
+
+export RIPGREP_CONFIG_PATH=~/.ripgreprc

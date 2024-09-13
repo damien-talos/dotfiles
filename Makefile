@@ -14,12 +14,13 @@ build/shellcheck.target: $(BASH_SCRIPTS)
 	shellcheck $? && touch $@
 
 git_config: ~/.gitconfig ~/.gitaliases
-bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases ~/.talos_aliases
-zsh_config: ~/.zshrc ~/.zshenv ~/.zprofile ~/.zsh_aliases ~/.talos_aliases
+bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases ~/.talos_aliases ~/.shenv
+zsh_config: ~/.zshrc ~/.zshenv ~/.zprofile ~/.zsh_aliases ~/.talos_aliases ~/.shenv
 x_config: ~/.xprofile
 launch_agents: ~/Library/LaunchAgents/com.user.loginscript.plist
+other_config: ~/.ripgreprc
 
-install_config_files: git_config bash_config zsh_config x_config launch_agents
+install_config_files: git_config bash_config zsh_config x_config launch_agents other_config
 
 install_bins: $(bins)
 install_functions: $(functions)

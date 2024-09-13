@@ -10,28 +10,10 @@ shopt -s extglob
 # Enable ** globs (if available)
 shopt globstar >/dev/null 2>&1 && shopt -s globstar
 
-PATH=~/.yarn/bin:~/bin:~/go/bin:~/.local/share/flatpak/exports/bin:~/workspace/experiments/depot_tools:$PATH
-PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
-export PATH
-export EDITOR=code
-export FZF_DEFAULT_COMMAND='fd'
-export SKIM_DEFAULT_COMMAND="fd --type f || git ls-tree -r --name-only HEAD || rg --files || find ."
-GITHUB_TOKEN=$(cat ~/.github_token)
-export GITHUB_TOKEN
-CIRCLECI_TOKEN=$(cat ~/.circleci_token)
-export CIRCLECI_TOKEN
-FIGMA_TOKEN=$(cat ~/.figma_token)
-export FIGMA_TOKEN
+# shellcheck source=.shenv
+source ~/.shenv
+PATH=~/.local/share/flatpak/exports/bin:~/workspace/experiments/depot_tools:$PATH
 
-# Escape code definitions
-# BLUE='\033[01;34m'
-# CYAN='\033[01;36m'
-# WHITE='\033[01;37m'
-RED='\033[01;31m'
-GRAY='\033[01;30;1m'
-# GREEN='\033[01;32m'
-# STRIKETRHOUGH='\033[9m'
-RESET='\033[00m'
 
 # Shell settings
 HISTCONTROL=ignoreboth:erasedups             # Save only one copy of the command
@@ -63,22 +45,6 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
   . /etc/bash_completion
 fi
 
-source_or_err() {
-  if [ -f "$1" ]; then
-    # shellcheck disable=1090
-    . "$1"
-  else
-    echo -e "${RED}Unable to find and source $1${RESET}"
-  fi
-}
-source_or_ignore() {
-  if [ -f "$1" ]; then
-    # shellcheck disable=1090
-    . "$1"
-  else
-    echo -e "${GRAY}Unable to find and source $1${RESET}"
-  fi
-}
 
 # Load my fancy prompt
 source_or_err "${HOME}/.bash-prompt.sh"
@@ -100,25 +66,18 @@ fi
 # source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
 # bind -x '"\t": fzf_bash_completion'
 
-source_or_ignore "$HOME/.cargo/env"
-source_or_ignore "/etc/profile.d/rvm.sh" # This loads rvm
-
-export NVM_DIR="$HOME/.nvm"
-source_or_ignore "$NVM_DIR/nvm.sh"          # This loads nvm
 source_or_ignore "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
-### LOAD AVA ENVIRONMENT VARS
-source_or_ignore "$HOME/workspace/talos/env/ava-vars.sh"
-source_or_err "$HOME/.ava_token"
-### END LOAD AVA ENVIRONMENT VARS
-
 # Google cloud
-source_or_err /snap/google-cloud-cli/current/path.bash.inc
-source_or_err /snap/google-cloud-cli/current/completion.bash.inc
+source_or_ignore /snap/google-cloud-cli/current/path.bash.inc
+source_or_ignore /snap/google-cloud-cli/current/completion.bash.inc
 
 # [ -f $HOME/workspace/shellcheck-repl/shellcheck-repl.bash ] && source "$HOME/workspace/shellcheck-repl/shellcheck-repl.bash"
 
 # for d in $HOME/workspace/talos/Ava-UI/.git/worktrees/*; do if [ ! -f "$(cat $d/gitdir)" ]; then TARGET=$(cat "$d/gitdir"); mkdir -p $(dirname "$TARGET") && echo "gitdir: $d" > $TARGET; fi; done
 
-# PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
+command -v direnv &>/dev/null && eval "$(direnv hook bash)"
+
+# Remove duplicate entries from $PATH, keep only the first one (left-to-right) (one final time in case we've added more duplicates in some of the files we sourced)
+PATH=$(printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}')
 export PATH
