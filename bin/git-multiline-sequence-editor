@@ -3,5 +3,5 @@
 TARGET_FILE=$1
 tmp=$(mktemp)
 read -ra git_editor < <(git var GIT_EDITOR)
-awk '/^[[:alpha:]]/ { print $0; commit = $2; command="git show --pretty='\''medium'\'' -s " commit; while ((command | getline) > 0) print "# ", $0; close(command); print ""; next; } {print $0;}' "$TARGET_FILE" > "$tmp"
+awk '/^[[:alpha:]]/ { print $0; commit = $2; command="git show --pretty='\''rebasemultilog'\'' --compact-summary " commit; while ((command | getline) > 0) print "# ", $0; close(command); print ""; next; } {print $0;}' "$TARGET_FILE" > "$tmp"
 mv "$tmp" "$TARGET_FILE" && "${git_editor[@]}" "$TARGET_FILE"

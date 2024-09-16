@@ -1,5 +1,5 @@
 [include]
-	path=.gitaliases
+	path = .gitaliases
 [blame]
 	# ignoreRevsFile = .git-blame-ignore-revs
 	markUnblamableLines = true
@@ -44,13 +44,14 @@
 	cmd = code --wait --merge "${MERGED}"
 [pretty]
 	# Generates a markdown checklist of commits
-	branchcompare=- [ ] %C(bold cyan)%h -- %C(bold green)@%an -- %C(bold red)%ad %Creset(%C(bold yellow)%N%-%Creset)%n      %s%-
+	branchcompare = - [ ] %C(bold cyan)%h -- %C(bold green)@%an -- %C(bold red)%ad %Creset(%C(bold yellow)%N%-%Creset)%n      %s%-
 	# %Short author date% %ref names% %subject% %Author Name% -- %commit hash%
-	onelinelog=%as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
+	onelinelog = %as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h
 	# %Short author date% %ref names% %Author Name% -- %commit hash%
 	# %subject%
 	# %body%
-	multilinelog=%as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h%+b
+	multilinelog = %as%C(auto)%d %s %C(bold green)@%an%Creset -- %C(bold cyan)%h%+b
+	rebasemultilog = commit  %H%nAuthor: %an%nDate:   %ad%n%B
 [pull]
 	rebase = true
 [push]
@@ -65,7 +66,7 @@
 [user]
 	name = Damien Schoof
 	email = damien.schoof@talostrading.com
-	signingkey =  30C3E8777A3618A1 #gitleaks:allow
+	signingkey = 30C3E8777A3618A1 #gitleaks:allow
 [gpg]
 	program = /opt/homebrew/bin/gpg
 [url "ssh://git@github.com/"]
