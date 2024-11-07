@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # shellcheck shell=bash
 
 # NOTE: This aliases file is sourced from both .zshrc and .bashrc, so must be compatible with both shells

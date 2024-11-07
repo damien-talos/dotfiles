@@ -51,7 +51,7 @@
     ### Force push all branches in the chain
     pushrefs = "!git fetch && git branch --format='%(if:notequals=)%(upstream:trackshort)%(then)%(refname:short)%(end)' --contains $(git log origin/develop..HEAD --format="%h" --reverse | head -1) | xargs -I {} git push --force-with-lease origin {}"
     ### Interactive rebase, but adds multiline description for each commit
-    rebasemulti = !git -c sequence.editor='git multiline-sequence-editor' rebase -i
+    rebasemulti = !git -c sequence.editor='git multiline-sequence-editor' rebase
     ### Rebase the current branch onto origin/HEAD
     reup = !git sync && echo "Rebasing onto $(git forked-from)" && git rebase "$(git forked-from)"
     # Shortcut to show current repo status

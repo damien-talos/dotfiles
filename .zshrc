@@ -8,6 +8,8 @@
 # $ZDOTDIR/.zlogin
 # $ZDOTDIR/.zlogout
 
+# zmodload zsh/zprof
+
 autoload -Uz compinit && compinit
 
 unsetopt auto_cd              # If a command is not found, do not attempt to treat it as a `cd` to a path
@@ -21,6 +23,7 @@ setopt hist_expire_dups_first # Cause the oldest history event that has a duplic
 setopt hist_find_no_dups      # When searching for history entries in the line editor, do not display duplicates of a line previously found, even if the duplicates are not contiguous.
 setopt prompt_subst           # Parameter expansion, command substitution and arithmetic expansion are performed in prompts
 setopt pushd_minus            # `cd -` will go back to the last directory you were in
+unsetopt nomatch              # When pattern matching fails, use the command "as is" (allows us to use `HEAD^` as a git reference, which would otherwise be interpreted as a glob pattern)
 
 source_or_err ~/.zsh_aliases
 
@@ -198,3 +201,6 @@ function precmd() {
 
 # bun completions
 [ -s "/Users/damien.schoof/.bun/_bun" ] && source "/Users/damien.schoof/.bun/_bun"
+
+# zprof
+command -v direnv &>/dev/null && eval "$(direnv hook zsh)"

@@ -2,8 +2,19 @@
 # _should_ really be zsh, but that's not supported in shellcheck
 
 # Add the shared aliases
+#shellcheck source=.sh_aliases
 . ~/.sh_aliases
 
-# zsh specific aliases
-alias resource='source ~/.zshenv && source ~/.zshrc'
-alias edrc='$EDITOR ~/.zshrc'
+### zsh specific aliases
+
+alias resource='source ~/.zshenv && source ~/.zshrc'    # Reloads the zshenv and zshrc files
+alias edrc='$EDITOR ~/.zshrc'                          # Edit the zshrc file
+alias spotx='bash <(curl -sSL https://spotx-official.github.io/run.sh)' # Re-run the SpotX setup script, to disable ads in spotify
+
+lspath() {
+    # List executable files in the current path
+    echo "$PATH" | awk -F : 'BEGIN {OFS="\n"}; {$1=$1; print $0}' | while read -r d; do
+        # echo "$d"
+        [ -d "$d" ] && find "$d" -maxdepth 1 -perm +111 -type f -or -type l
+    done | sort
+}

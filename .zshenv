@@ -13,6 +13,6 @@ export PATH
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Added by Toolbox App
-PATH="$PATH:'/Users/damien.schoof/Library/Application Support/JetBrains/Toolbox/scripts'"
+PATH="$PATH:/Users/damien.schoof/Library/Application\ Support/JetBrains/Toolbox/scripts"
 
 source ~/.shenv

@@ -326,3 +326,6 @@ function _talos_fn_complete {
 
 alias startStaging='([ -d apps/ava ] && cd apps/ava || true; bun start:staging)'
 alias startUat='([ -d apps/ava ] && cd apps/ava || true; bun start:staging)'
+
+alias buildRunDevLocal='make build_gocode_bin clean_logs && ./scripts/runspecified.sh dev.local -e coinbase -d cumberland,fireblocks,internal'
+alias buildBackend='make clean deps_gocode build_ava build_java build_gocode build_gocode_bin'
