@@ -4,6 +4,7 @@ review() {
         ~/bin/review --echo-cd "$@" | tee /dev/tty | tail -n 1
     )
     if [[ $? -eq 0 ]] && [[ -n "$OUTPUT" ]] && [[ -d "$OUTPUT" ]]; then
+        # cd into the dir we just checked out
         cd "$OUTPUT" || return 0
         return 0
     else
