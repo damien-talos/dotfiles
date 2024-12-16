@@ -25,7 +25,7 @@ setopt prompt_subst           # Parameter expansion, command substitution and ar
 setopt pushd_minus            # `cd -` will go back to the last directory you were in
 unsetopt nomatch              # When pattern matching fails, use the command "as is" (allows us to use `HEAD^` as a git reference, which would otherwise be interpreted as a glob pattern)
 
-source ./.utils.sh
+source ~/.utils.sh
 source ~/.shrc
 source_or_err ~/.zsh_aliases
 
