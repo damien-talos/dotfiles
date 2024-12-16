@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Shared "rc" for both bash and zsh
+
+source_or_ignore "$NVM_DIR/nvm.sh" --no-use # This loads nvm
+source_or_ignore "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# source_or_ignore "$HOME/.rvm/scripts/rvm"
+
+# bun completions
+source_or_ignore "$BUN_INSTALL/_bun"

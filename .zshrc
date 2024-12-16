@@ -8,7 +8,7 @@
 # $ZDOTDIR/.zlogin
 # $ZDOTDIR/.zlogout
 
-# zmodload zsh/zprof
+zmodload zsh/zprof
 
 autoload -Uz compinit && compinit
 
@@ -25,7 +25,35 @@ setopt prompt_subst           # Parameter expansion, command substitution and ar
 setopt pushd_minus            # `cd -` will go back to the last directory you were in
 unsetopt nomatch              # When pattern matching fails, use the command "as is" (allows us to use `HEAD^` as a git reference, which would otherwise be interpreted as a glob pattern)
 
+source ./.utils.sh
+source ~/.shrc
 source_or_err ~/.zsh_aliases
+
+#region NVM Auto load
+autoload -U add-zsh-hook
+
+load-nvmrc() {
+  local nvmrc_path
+  nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version
+    nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install
+    elif [ "$nvmrc_node_version" != "$(nvm version)" ]; then
+      nvm use
+    fi
+  elif [ -n "$(PWD=$OLDPWD nvm_find_nvmrc)" ] && [ "$(nvm version)" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+  fi
+}
+
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+#endregion
 
 # Functions are split to individual script files for readability
 if [ -d ~/.config/zsh/functions.d ]; then
@@ -45,6 +73,7 @@ fi
 ### PROMPT SETUP ###
 ####################
 
+if [ -z "$INTELLIJ_ENVIRONMENT_READER" ]; then
 set_git_prompt() {
     # Called only one time, in set_prompt
     # Git working branch stuff
@@ -64,6 +93,7 @@ set_git_prompt() {
 }
 
 set_git_prompt
+fi
 
 # Set FIRST_PROMPT=1 if it currently has no value
 # Ensures that we don't try to calculate previous command
@@ -202,5 +232,5 @@ function precmd() {
 # bun completions
 [ -s "/Users/damien.schoof/.bun/_bun" ] && source "/Users/damien.schoof/.bun/_bun"
 
-# zprof
 command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
+# zprof

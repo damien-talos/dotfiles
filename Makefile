@@ -14,8 +14,9 @@ build/shellcheck.target: $(BASH_SCRIPTS)
 	shellcheck $? && touch $@
 
 git_config: ~/.gitconfig ~/.gitaliases
-bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases ~/.talos_aliases ~/.shenv
-zsh_config: ~/.zshrc ~/.zshenv ~/.zprofile ~/.zsh_aliases ~/.talos_aliases ~/.shenv
+shared_config: ~/.talos_aliases ~/.shenv ~/.utils.sh ~/.shrc
+bash_config: ~/.bashrc ~/.bash-prompt.sh ~/.bash_aliases shared_config
+zsh_config: ~/.zshrc ~/.zshenv ~/.zprofile ~/.zsh_aliases shared_config
 x_config: ~/.xprofile
 launch_agents: ~/Library/LaunchAgents/com.user.loginscript.plist
 other_config: ~/.ripgreprc
