@@ -26,7 +26,7 @@ RESET="\033[00m"
 [ -n "$ECHO_CURRENT_DIR" ] || ECHO_CURRENT_DIR=0
 # END SCRIPT VARIABLES
 
-out() { echo -e "$(date +%Y-%m-%dT%H:%M:%SZ): $*"; }
+out() { [ "$VERBOSE" -gt 0 ] && echo -n "$(date +%Y-%m-%dT%H:%M:%SZ): "; echo -e "$*"; }
 err() { out "$*" 1>&2; }
 vrb() { if [ "$VERBOSE" -gt 1 ]; then out "$@"; fi; }
 dbg() { if [ "$VERBOSE" -gt 0 ]; then err "$@"; fi; }
@@ -162,6 +162,16 @@ if [ -z "$PULL_REQUEST_ID" ] && [ -z "$BRANCH_NAME" ]; then
         shift
         CHECKOUT_PATH="${CHECKOUT_PATH:-$GIT_WORKTREE_ROOT/${BRANCH_NAME}}"
     fi
+fi
+
+if [ -z "${GITHUB_TOKEN}" ]; then
+    err "GITHUB_TOKEN environment variable must be set"
+    err "Steps:"
+    err " 1. Go to https://github.com/settings/tokens"
+    err " 2. Generate new token with 'repo' scope"
+    err " 3. Configure SSO for that token if needed"
+    err " 4. Export that token in \$GITHUB_TOKEN"
+    die "\$GITHUB_TOKEN environment variable must be set" 1
 fi
 
 # Find the github api url for the repo, based on the remote origin
